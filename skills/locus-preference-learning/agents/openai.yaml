@@ -1,0 +1,4 @@
+interface:
+  display_name: "Locus Preference Learning"
+  short_description: "Infer session preferences and propose durable profile changes."
+  default_prompt: "Use the Locus preference learning skill to record session observations and propose reviewable preference candidates."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Locus Export"
+  short_description: "Export Locus research as JSON or Markdown."
+  default_prompt: "Use the Locus export skill to generate and review JSON or Markdown exports from the local Locus database."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Locus Research"
+  short_description: "Research companies and roles into Locus with evidence."
+  default_prompt: "Use the Locus research skill to read the profile/session and populate companies, roles, notes, and evidence through the locus CLI."

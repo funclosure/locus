@@ -365,6 +365,7 @@ Exit criteria:
 
 - An agent can read the skills and use the CLI without extra explanation.
 - The same instruction content can be adapted for Claude project context.
+- Current status: `convo`, `locus-research`, `locus-curation`, `locus-preference-learning`, and `locus-export` exist under `skills/`.
 
 ## Phase 3: Browse UI
 

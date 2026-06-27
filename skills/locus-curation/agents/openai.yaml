@@ -1,0 +1,4 @@
+interface:
+  display_name: "Locus Curation"
+  short_description: "Curate Locus records with statuses, labels, and useful notes."
+  default_prompt: "Use the Locus curation skill to clean up company and role records, statuses, labels, notes, and evidence quality."
