@@ -1,8 +1,10 @@
 import { z } from "zod";
 import {
   companyStatuses,
+  candidateStatuses,
   memoryKinds,
   noteKinds,
+  preferenceKinds,
   remotePolicies,
   roleStatuses,
   sourceTypes,
@@ -79,8 +81,19 @@ export const sessionMemoryInputSchema = z.object({
   confidence: confidenceSchema.default(null),
 });
 
+export const preferenceCandidateInputSchema = z.object({
+  sessionId: z.coerce.number().int().positive(),
+  profileId: z.coerce.number().int().positive().default(1),
+  kind: z.enum(preferenceKinds),
+  label: trimmedString,
+  description: trimmedString,
+  confidence: confidenceSchema.default(null),
+  status: z.enum(candidateStatuses).default("pending"),
+});
+
 export type SessionStartInput = z.infer<typeof sessionStartInputSchema>;
 export type CompanyInput = z.infer<typeof companyInputSchema>;
 export type RoleInput = z.infer<typeof roleInputSchema>;
 export type NoteInput = z.infer<typeof noteInputSchema>;
 export type EvidenceInput = z.infer<typeof evidenceInputSchema>;
+export type PreferenceCandidateInput = z.infer<typeof preferenceCandidateInputSchema>;
