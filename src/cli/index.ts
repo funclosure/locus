@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { writeFileSync } from "node:fs";
 import { Command } from "commander";
 import { openDatabase } from "../db/client.js";
 import { migrateDatabase } from "../db/migrate.js";
@@ -11,8 +12,11 @@ import {
   roleInputSchema,
   sessionStartInputSchema,
 } from "../domain/validators.js";
+import { buildJsonExport } from "../export/json.js";
+import { buildMarkdownExport } from "../export/markdown.js";
 import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
+import { recordExport } from "../repositories/exportRepository.js";
 import { addNote, listNotes } from "../repositories/noteRepository.js";
 import {
   approvePreferenceCandidate,
@@ -277,6 +281,51 @@ preference
       const created = proposePreferenceCandidate(db, input);
       if (options.json) printJson({ preference: created });
       else printText(`Proposed preference ${created.id}: ${created.label}`);
+    } finally {
+      db.close();
+    }
+  });
+
+const exportCommand = program.command("export").description("Export commands");
+
+exportCommand
+  .command("json")
+  .option("--path <path>", "Write export to path")
+  .action((options: { path?: string }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const data = buildJsonExport(db);
+      const output = `${JSON.stringify(data, null, 2)}\n`;
+      if (options.path) {
+        writeFileSync(options.path, output);
+        const exportRecord = recordExport(db, { format: "json", title: "Locus JSON Export", path: options.path });
+        printJson({ export: exportRecord });
+      } else {
+        process.stdout.write(output);
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+exportCommand
+  .command("markdown")
+  .option("--path <path>", "Write export to path")
+  .option("--json", "Print machine-readable JSON when writing to path")
+  .action((options: { path?: string; json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const output = buildMarkdownExport(db);
+      if (options.path) {
+        writeFileSync(options.path, output);
+        const exportRecord = recordExport(db, { format: "markdown", title: "Locus Markdown Export", path: options.path });
+        if (options.json) printJson({ export: exportRecord });
+        else printText(`Wrote markdown export to ${options.path}`);
+      } else {
+        process.stdout.write(output);
+      }
     } finally {
       db.close();
     }
