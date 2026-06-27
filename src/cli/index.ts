@@ -3,12 +3,27 @@ import { Command } from "commander";
 import { openDatabase } from "../db/client.js";
 import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
-import { companyInputSchema, roleInputSchema, sessionStartInputSchema } from "../domain/validators.js";
+import {
+  companyInputSchema,
+  evidenceInputSchema,
+  noteInputSchema,
+  preferenceCandidateInputSchema,
+  roleInputSchema,
+  sessionStartInputSchema,
+} from "../domain/validators.js";
 import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
+import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
+import { addNote, listNotes } from "../repositories/noteRepository.js";
+import {
+  approvePreferenceCandidate,
+  listPreferenceCandidates,
+  proposePreferenceCandidate,
+  rejectPreferenceCandidate,
+} from "../repositories/preferenceCandidateRepository.js";
 import { getDefaultProfile, listProfilePreferences } from "../repositories/profileRepository.js";
 import { addRole, listRoles, updateRole } from "../repositories/roleRepository.js";
 import { createSession, getActiveSession, getSession } from "../repositories/sessionRepository.js";
-import { mergeOptionsWithJson, readStdinJson } from "./input.js";
+import { mergeOptionsWithJson, parseTargetRef, readStdinJson } from "./input.js";
 import { printJson, printText } from "./output.js";
 
 function ensureDatabase(): void {
@@ -156,6 +171,160 @@ role
       } else {
         printText(`Added role ${created.id}: ${created.title}`);
       }
+    } finally {
+      db.close();
+    }
+  });
+
+const note = program.command("note").description("Note commands");
+
+note
+  .command("add")
+  .option("--session-id <sessionId>", "Linked session id")
+  .option("--target <target>", "Target ref like company:1")
+  .option("--title <title>", "Note title")
+  .requiredOption("--body <body>", "Note body")
+  .option("--kind <kind>", "Note kind")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { sessionId?: string; target?: string; title?: string; body: string; kind?: string; json?: boolean }) => {
+    ensureDatabase();
+    const target = options.target ? parseTargetRef(options.target) : {};
+    const input = noteInputSchema.parse({ ...options, ...target });
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const created = addNote(db, input);
+      if (options.json) printJson({ note: created });
+      else printText(`Added note ${created.id}`);
+    } finally {
+      db.close();
+    }
+  });
+
+note
+  .command("list")
+  .option("--target <target>", "Target ref like company:1")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { target?: string; json?: boolean }) => {
+    ensureDatabase();
+    const target = options.target ? parseTargetRef(options.target) : {};
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const notes = listNotes(db, target);
+      if (options.json) printJson({ notes });
+      else notes.forEach((item) => printText(`${item.id}: ${item.body}`));
+    } finally {
+      db.close();
+    }
+  });
+
+const evidence = program.command("evidence").description("Evidence commands");
+
+evidence
+  .command("add")
+  .requiredOption("--target <target>", "Target ref like company:1")
+  .requiredOption("--url <url>", "Source URL")
+  .option("--title <title>", "Source title")
+  .requiredOption("--snippet <snippet>", "Source snippet")
+  .option("--source-type <sourceType>", "Source type")
+  .option("--confidence <confidence>", "Confidence from 0.0 to 1.0")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { target: string; url: string; title?: string; snippet: string; sourceType?: string; confidence?: string; json?: boolean }) => {
+    ensureDatabase();
+    const input = evidenceInputSchema.parse({ ...options, ...parseTargetRef(options.target) });
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const created = addEvidence(db, input);
+      if (options.json) printJson({ evidence: created });
+      else printText(`Added evidence ${created.id}`);
+    } finally {
+      db.close();
+    }
+  });
+
+evidence
+  .command("list")
+  .option("--target <target>", "Target ref like company:1")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { target?: string; json?: boolean }) => {
+    ensureDatabase();
+    const target = options.target ? parseTargetRef(options.target) : {};
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const items = listEvidence(db, target);
+      if (options.json) printJson({ evidence: items });
+      else items.forEach((item) => printText(`${item.id}: ${item.url}`));
+    } finally {
+      db.close();
+    }
+  });
+
+const preference = program.command("preference").description("Preference candidate commands");
+
+preference
+  .command("propose")
+  .requiredOption("--session-id <sessionId>", "Session id")
+  .option("--profile-id <profileId>", "Profile id", "1")
+  .requiredOption("--kind <kind>", "Preference kind")
+  .requiredOption("--label <label>", "Preference label")
+  .requiredOption("--description <description>", "Preference description")
+  .option("--confidence <confidence>", "Confidence from 0.0 to 1.0")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: Record<string, unknown> & { json?: boolean }) => {
+    ensureDatabase();
+    const input = preferenceCandidateInputSchema.parse(options);
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const created = proposePreferenceCandidate(db, input);
+      if (options.json) printJson({ preference: created });
+      else printText(`Proposed preference ${created.id}: ${created.label}`);
+    } finally {
+      db.close();
+    }
+  });
+
+preference
+  .command("list")
+  .option("--status <status>", "Candidate status")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { status?: string; json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const preferences = listPreferenceCandidates(db, options.status ? { status: preferenceCandidateInputSchema.shape.status.parse(options.status) } : {});
+      if (options.json) printJson({ preferences });
+      else preferences.forEach((item) => printText(`${item.id}: ${item.label} [${item.status}]`));
+    } finally {
+      db.close();
+    }
+  });
+
+preference
+  .command("approve")
+  .requiredOption("--id <id>", "Preference candidate id")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { id: string; json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const updated = approvePreferenceCandidate(db, Number(options.id));
+      if (options.json) printJson({ preference: updated });
+      else printText(`Approved preference ${updated.id}`);
+    } finally {
+      db.close();
+    }
+  });
+
+preference
+  .command("reject")
+  .requiredOption("--id <id>", "Preference candidate id")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { id: string; json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const updated = rejectPreferenceCandidate(db, Number(options.id));
+      if (options.json) printJson({ preference: updated });
+      else printText(`Rejected preference ${updated.id}`);
     } finally {
       db.close();
     }
