@@ -1,0 +1,405 @@
+{
+  "profile": {
+    "id": 1,
+    "name": "Victor",
+    "summary": "iOS developer in Hong Kong actively exploring remote senior-level roles at craft-driven, meaningful, AI-native, Apple-platform, notes, writing, and knowledge-tool companies. Strongest fit is work where iOS craft, interaction design, Swift concurrency, and product taste shape how the experience feels in hand.",
+    "createdAt": "2026-06-27T14:57:54.496Z",
+    "updatedAt": "2026-06-27T14:58:48.500Z"
+  },
+  "preferences": [
+    {
+      "id": 1,
+      "profileId": 1,
+      "kind": "requirement",
+      "label": "Remote required",
+      "description": "Remote work is a hard requirement.",
+      "weight": 1,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 2,
+      "profileId": 1,
+      "kind": "requirement",
+      "label": "Meaningful interaction work",
+      "description": "The product must matter to real people, and the interaction model itself should be central to the product rather than a wrapper.",
+      "weight": 1,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 3,
+      "profileId": 1,
+      "kind": "interest",
+      "label": "iOS and Apple platforms",
+      "description": "Strong interest in iOS, interaction design, and Apple-platform-native products.",
+      "weight": 0.95,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 4,
+      "profileId": 1,
+      "kind": "interest",
+      "label": "AI-first products",
+      "description": "Interested in teams building AI-first products with strong product taste.",
+      "weight": 0.85,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 5,
+      "profileId": 1,
+      "kind": "positive_signal",
+      "label": "Craft-driven teams",
+      "description": "Prefers small, high-quality teams with strong design and product craft.",
+      "weight": 0.9,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 6,
+      "profileId": 1,
+      "kind": "positive_signal",
+      "label": "Small high-leverage teams",
+      "description": "Ideal company size is under 50 people; mid-size is fine if the craft culture is still intact.",
+      "weight": 0.85,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 7,
+      "profileId": 1,
+      "kind": "positive_signal",
+      "label": "Hong Kong friendly remote",
+      "description": "HK-based or HK-friendly async teams are a real edge; daily odd-hour US sync calls are a dealbreaker.",
+      "weight": 0.9,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 8,
+      "profileId": 1,
+      "kind": "positive_signal",
+      "label": "Design-minded engineering culture",
+      "description": "Prefers engineers who care about design and leave room for craft judgment, not pure Figma-to-code execution.",
+      "weight": 0.9,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 9,
+      "profileId": 1,
+      "kind": "positive_signal",
+      "label": "Warm researched outreach",
+      "description": "Outreach should be thoughtful and research-led, asking for thinking rather than jobs, never generic or desperate.",
+      "weight": 0.75,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 10,
+      "profileId": 1,
+      "kind": "negative_signal",
+      "label": "No mobile-afterthought teams",
+      "description": "Avoid Android-first, cross-platform-first, backend/infra-only, or B2B SaaS teams that treat mobile as a checkbox.",
+      "weight": 1,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 11,
+      "profileId": 1,
+      "kind": "negative_signal",
+      "label": "No hustle culture",
+      "description": "Avoid move-fast-and-break-things cultures, remote-as-a-perk cultures, and roles with no room for product taste.",
+      "weight": 0.95,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    },
+    {
+      "id": 12,
+      "profileId": 1,
+      "kind": "constraint",
+      "label": "Open to TypeScript for the right mission",
+      "description": "TypeScript, React, or full-stack work is acceptable only when the mission and interaction challenge are strong enough.",
+      "weight": 0.55,
+      "source": "manual",
+      "createdAt": "2026-06-27T14:57:54.496Z",
+      "updatedAt": "2026-06-27T14:57:54.496Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": 1,
+      "profileId": 1,
+      "title": "Smoke-test Locus with curated Apple-native AI/productivity companies",
+      "goal": "Smoke-test Locus with curated Apple-native AI/productivity companies",
+      "status": "active",
+      "startedAt": "2026-06-27T14:58:35.817Z",
+      "endedAt": null,
+      "summary": null,
+      "createdAt": "2026-06-27T14:58:35.817Z",
+      "updatedAt": "2026-06-27T14:58:35.817Z"
+    }
+  ],
+  "companies": [
+    {
+      "id": 1,
+      "name": "GoodNotes",
+      "url": "https://www.goodnotes.com",
+      "hq": "Hong Kong",
+      "summary": "Pen-first productivity evolving into AI; same-city advantage makes this the highest-leverage warm outreach target.",
+      "primaryLabel": "HK + AI-note-taking",
+      "status": "watching",
+      "fitScore": 0.9,
+      "fitAssessment": "Excellent iOS/iPadOS and geo fit, but remote policy and current iOS role location need verification.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:35.901Z",
+      "updatedAt": "2026-06-27T14:58:35.901Z"
+    },
+    {
+      "id": 2,
+      "name": "Linear",
+      "url": "https://linear.app",
+      "hq": "San Francisco, USA (remote-first)",
+      "summary": "Remote-first, high-craft product team; gold standard for design-engineering taste.",
+      "primaryLabel": "craft-driven",
+      "status": "shortlisted",
+      "fitScore": 0.88,
+      "fitAssessment": "Strong craft and remote fit; weaker direct iOS fit, so outreach needs an interaction-design angle.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:36.131Z",
+      "updatedAt": "2026-06-27T14:58:36.131Z"
+    },
+    {
+      "id": 3,
+      "name": "Craft Docs",
+      "url": "https://craft.do",
+      "hq": "Budapest, Hungary (remote)",
+      "summary": "Apple Design Award-winning docs product with strong Apple-platform identity.",
+      "primaryLabel": "Apple-platform craft",
+      "status": "shortlisted",
+      "fitScore": 0.86,
+      "fitAssessment": "Strong Apple-platform and product-craft fit; small team means hiring may be slow.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:36.358Z",
+      "updatedAt": "2026-06-27T14:58:36.358Z"
+    },
+    {
+      "id": 4,
+      "name": "Mem",
+      "url": "https://mem.ai",
+      "hq": "San Francisco, USA",
+      "summary": "AI-native notes and personal knowledge management; mission fit is strong but stack may be web-first.",
+      "primaryLabel": "AI memory",
+      "status": "watching",
+      "fitScore": 0.78,
+      "fitAssessment": "Excellent AI/knowledge fit; catch is current role is full-stack TypeScript/React rather than iOS.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:36.589Z",
+      "updatedAt": "2026-06-27T14:58:36.589Z"
+    },
+    {
+      "id": 5,
+      "name": "Cultured Code (Things)",
+      "url": "https://culturedcode.com",
+      "hq": "Stuttgart, Germany",
+      "summary": "Tiny Apple-platform studio behind Things; still a benchmark for iOS task interaction design.",
+      "primaryLabel": "iOS-only craft",
+      "status": "watching",
+      "fitScore": 0.82,
+      "fitAssessment": "Deep iOS craft fit, but hiring is extremely rare and requires authentic product affinity.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:36.896Z",
+      "updatedAt": "2026-06-27T14:58:36.896Z"
+    },
+    {
+      "id": 6,
+      "name": "Shiny Frog (Bear)",
+      "url": "https://bear.app",
+      "hq": "Lecce, Italy",
+      "summary": "Beautiful Apple-native markdown notes by a tiny remote team.",
+      "primaryLabel": "Apple-native notes",
+      "status": "watching",
+      "fitScore": 0.8,
+      "fitAssessment": "Strong Apple-native notes fit; catch is tiny-team rare hiring.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:37.150Z",
+      "updatedAt": "2026-06-27T14:58:37.150Z"
+    }
+  ],
+  "roles": [
+    {
+      "id": 1,
+      "companyId": 4,
+      "title": "Senior Software Engineer, Full-Stack",
+      "url": "https://jobs.ashbyhq.com/mem.ai/62bda8e2-4bf3-41e4-9abd-e0be52f37bc5",
+      "location": null,
+      "remotePolicy": "remote",
+      "seniority": null,
+      "compensation": null,
+      "summary": "Web-first role involving real-time collaboration, offline sync, and AI co-editing.",
+      "status": "researching",
+      "fitScore": 0.65,
+      "fitAssessment": "Mission fit is real, but this is a stack pivot; only pursue if interaction challenge is strong enough.",
+      "lastCheckedAt": null,
+      "createdAt": "2026-06-27T14:58:36.667Z",
+      "updatedAt": "2026-06-27T14:58:36.667Z"
+    }
+  ],
+  "notes": [
+    {
+      "id": 1,
+      "sessionId": null,
+      "targetType": "company",
+      "targetId": 1,
+      "title": null,
+      "body": "Catch: strongest geo edge, but verify remote eligibility before treating it as actionable.",
+      "kind": "decision",
+      "createdAt": "2026-06-27T14:58:36.054Z",
+      "updatedAt": "2026-06-27T14:58:36.054Z"
+    },
+    {
+      "id": 2,
+      "sessionId": null,
+      "targetType": "company",
+      "targetId": 2,
+      "title": null,
+      "body": "Catch: rare hiring; follow team members and wait for a role where mobile/product craft is relevant.",
+      "kind": "observation",
+      "createdAt": "2026-06-27T14:58:36.281Z",
+      "updatedAt": "2026-06-27T14:58:36.281Z"
+    },
+    {
+      "id": 3,
+      "sessionId": null,
+      "targetType": "company",
+      "targetId": 3,
+      "title": null,
+      "body": "Warm intro through Apple developer community likely beats cold application.",
+      "kind": "decision",
+      "createdAt": "2026-06-27T14:58:36.513Z",
+      "updatedAt": "2026-06-27T14:58:36.513Z"
+    },
+    {
+      "id": 4,
+      "sessionId": null,
+      "targetType": "company",
+      "targetId": 4,
+      "title": null,
+      "body": "Catch: likely not Swift day-to-day. Good test of the 'TypeScript for the right mission' constraint.",
+      "kind": "decision",
+      "createdAt": "2026-06-27T14:58:36.820Z",
+      "updatedAt": "2026-06-27T14:58:36.820Z"
+    },
+    {
+      "id": 5,
+      "sessionId": null,
+      "targetType": "company",
+      "targetId": 5,
+      "title": null,
+      "body": "Being a genuine long-time user matters more than a generic CV here.",
+      "kind": "observation",
+      "createdAt": "2026-06-27T14:58:37.048Z",
+      "updatedAt": "2026-06-27T14:58:37.048Z"
+    },
+    {
+      "id": 6,
+      "sessionId": null,
+      "targetType": "company",
+      "targetId": 6,
+      "title": null,
+      "body": "Love the product publicly before applying; warm community signal matters.",
+      "kind": "observation",
+      "createdAt": "2026-06-27T14:58:37.309Z",
+      "updatedAt": "2026-06-27T14:58:37.309Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": 1,
+      "targetType": "company",
+      "targetId": 1,
+      "url": "https://www.goodnotes.com/careers",
+      "title": null,
+      "snippet": "Company careers page; seed says current iOS roles may be London-listed.",
+      "sourceType": "manual",
+      "confidence": 0.7,
+      "checkedAt": "2026-06-27T14:58:35.977Z",
+      "createdAt": "2026-06-27T14:58:35.977Z"
+    },
+    {
+      "id": 2,
+      "targetType": "company",
+      "targetId": 2,
+      "url": "https://linear.app/careers",
+      "title": null,
+      "snippet": "Careers page for a remote-first, craft-driven product company.",
+      "sourceType": "manual",
+      "confidence": 0.75,
+      "checkedAt": "2026-06-27T14:58:36.204Z",
+      "createdAt": "2026-06-27T14:58:36.204Z"
+    },
+    {
+      "id": 3,
+      "targetType": "company",
+      "targetId": 3,
+      "url": "https://craft.do/careers",
+      "title": null,
+      "snippet": "Careers page for Craft Docs; seed notes remote and Apple Design Award signal.",
+      "sourceType": "manual",
+      "confidence": 0.75,
+      "checkedAt": "2026-06-27T14:58:36.434Z",
+      "createdAt": "2026-06-27T14:58:36.434Z"
+    },
+    {
+      "id": 4,
+      "targetType": "company",
+      "targetId": 4,
+      "url": "https://jobs.ashbyhq.com/mem.ai/62bda8e2-4bf3-41e4-9abd-e0be52f37bc5",
+      "title": null,
+      "snippet": "Seeded known role: Senior Software Engineer, Full-Stack; remote; web-first stack.",
+      "sourceType": "manual",
+      "confidence": 0.8,
+      "checkedAt": "2026-06-27T14:58:36.744Z",
+      "createdAt": "2026-06-27T14:58:36.744Z"
+    },
+    {
+      "id": 5,
+      "targetType": "company",
+      "targetId": 5,
+      "url": "https://culturedcode.com/jobs",
+      "title": null,
+      "snippet": "Jobs page for Cultured Code; seed notes very rare hiring.",
+      "sourceType": "manual",
+      "confidence": 0.75,
+      "checkedAt": "2026-06-27T14:58:36.972Z",
+      "createdAt": "2026-06-27T14:58:36.972Z"
+    },
+    {
+      "id": 6,
+      "targetType": "company",
+      "targetId": 6,
+      "url": "https://bear.app/jobs",
+      "title": null,
+      "snippet": "Jobs page for Bear; seed notes small remote team and Apple-native markdown focus.",
+      "sourceType": "manual",
+      "confidence": 0.75,
+      "checkedAt": "2026-06-27T14:58:37.231Z",
+      "createdAt": "2026-06-27T14:58:37.231Z"
+    }
+  ],
+  "preferenceCandidates": []
+}
