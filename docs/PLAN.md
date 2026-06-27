@@ -300,6 +300,22 @@ CLI input contract:
 - Accept stdin JSON for complex writes in later commands.
 - Every write command with `--json` returns the created or updated record.
 
+Expanded CLI surface:
+
+- `locus company add/list/update --json`.
+- `locus role add/list/update --json`.
+- `locus note add/list --target company:1 --json`.
+- `locus evidence add/list --target company:1 --json`.
+- `locus preference propose/approve/reject/list --json`.
+- `locus export json`.
+- `locus export markdown --path shortlist.md --json`.
+
+Agent command conventions:
+
+- Use compact target refs like `company:1`, `role:2`, and `session:1`.
+- Use flags for simple values.
+- Pipe stdin JSON for complex writes, for example `echo '{"companyId":1,"title":"Senior iOS Engineer"}' | locus role add --json`.
+
 Recommended command surface:
 
 ```txt
