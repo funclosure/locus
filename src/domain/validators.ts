@@ -18,7 +18,7 @@ const nullableTrimmedString = z
   .optional()
   .transform((value) => value ?? null);
 
-export const scoreSchema = z.number().min(0).max(1).nullable();
+export const scoreSchema = z.coerce.number().min(0).max(1).nullable();
 export const confidenceSchema = scoreSchema;
 export const fitScoreSchema = scoreSchema;
 
