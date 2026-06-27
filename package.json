@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
-    "locus": "tsx src/cli/index.ts"
+    "locus": "tsx src/cli/index.ts",
+    "web": "node dist/web/server.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",

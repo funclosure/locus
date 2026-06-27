@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Locus</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="toolbar" aria-label="Browse controls">
+        <div>
+          <p class="eyebrow">Locus</p>
+          <h1>Company research</h1>
+        </div>
+        <div class="filters">
+          <input id="search" type="search" placeholder="Search companies" autocomplete="off" />
+          <select id="statusFilter" aria-label="Status"></select>
+          <select id="labelFilter" aria-label="Label"></select>
+        </div>
+      </section>
+      <section class="content-grid">
+        <section>
+          <div id="summary" class="summary-strip"></div>
+          <div id="companyGrid" class="company-grid" aria-live="polite"></div>
+        </section>
+        <aside id="detailPanel" class="detail-panel" aria-label="Company detail"></aside>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
