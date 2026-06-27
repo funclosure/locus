@@ -1,18 +1,10 @@
-import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { runCli } from "./helpers.js";
 
 let tempDir: string | null = null;
-
-function runCli(args: string[], dbPath: string): string {
-  return execFileSync("pnpm", ["tsx", "src/cli/index.ts", ...args], {
-    cwd: process.cwd(),
-    env: { ...process.env, LOCUS_DB_PATH: dbPath },
-    encoding: "utf8",
-  });
-}
 
 afterEach(() => {
   if (tempDir) {

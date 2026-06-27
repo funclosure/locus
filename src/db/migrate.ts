@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { openDatabase } from "./client.js";
 
@@ -8,9 +8,17 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const migrations = [
   {
     version: "0001_initial",
-    path: join(__dirname, "migrations", "0001_initial.sql"),
+    path: migrationPath("0001_initial.sql"),
   },
 ];
+
+function migrationPath(filename: string): string {
+  const builtPath = join(__dirname, "migrations", filename);
+  if (existsSync(builtPath)) {
+    return builtPath;
+  }
+  return resolve(process.cwd(), "src", "db", "migrations", filename);
+}
 
 export function migrateDatabase(dbPath?: string): void {
   const db = openDatabase(dbPath);
