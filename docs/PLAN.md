@@ -286,6 +286,20 @@ Deliverables:
 - JSON output mode for agent use.
 - Seed profile for the initial user context.
 
+Initial implementation slice:
+
+- Database migration and seed profile.
+- TypeScript domain types and validation helpers.
+- `locus profile show --json`.
+- `locus session start --goal "Research AI-native notes companies" --json`.
+- `locus session show --json`.
+
+CLI input contract:
+
+- Prefer flags for simple reads and single-field operations.
+- Accept stdin JSON for complex writes in later commands.
+- Every write command with `--json` returns the created or updated record.
+
 Recommended command surface:
 
 ```txt
