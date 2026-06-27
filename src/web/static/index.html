@@ -11,7 +11,7 @@
       <section class="toolbar" aria-label="Browse controls">
         <div>
           <p class="eyebrow">Locus</p>
-          <h1>Company research</h1>
+          <h1>Research cockpit</h1>
         </div>
         <div class="filters">
           <input id="search" type="search" placeholder="Search companies" autocomplete="off" />
@@ -19,12 +19,12 @@
           <select id="labelFilter" aria-label="Label"></select>
         </div>
       </section>
-      <section class="content-grid">
-        <section>
+      <section class="workspace">
+        <aside class="sidebar" aria-label="Companies">
           <div id="summary" class="summary-strip"></div>
-          <div id="companyGrid" class="company-grid" aria-live="polite"></div>
-        </section>
-        <aside id="detailPanel" class="detail-panel" aria-label="Company detail"></aside>
+          <div id="companyList" class="company-list" aria-live="polite"></div>
+        </aside>
+        <section id="detailPanel" class="detail-panel" aria-label="Company detail"></section>
       </section>
     </main>
     <script type="module" src="/app.js"></script>

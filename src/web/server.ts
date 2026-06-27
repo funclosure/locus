@@ -6,6 +6,8 @@ import { buildJsonExport } from "../export/json.js";
 import { openDatabase } from "../db/client.js";
 import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
+import { applicationInputSchema } from "../domain/validators.js";
+import { upsertApplication } from "../repositories/applicationRepository.js";
 
 export type LocusWebServerOptions = {
   dbPath?: string;
@@ -47,13 +49,19 @@ export async function handleLocusWebRequest(
 ): Promise<void> {
   try {
     const url = new URL(request.url ?? "/", "http://localhost");
-    if (request.method !== "GET") {
-      writeJson(response, 405, { error: "Method not allowed." });
+    if (request.method === "GET" && url.pathname === "/api/snapshot") {
+      writeJson(response, 200, buildSnapshot(options.dbPath));
       return;
     }
 
-    if (url.pathname === "/api/snapshot") {
-      writeJson(response, 200, buildSnapshot(options.dbPath));
+    if (request.method === "POST" && url.pathname === "/api/applications") {
+      const input = applicationInputSchema.parse(JSON.parse(await readBody(request)));
+      writeJson(response, 200, { application: saveApplication(options.dbPath, input) });
+      return;
+    }
+
+    if (request.method !== "GET") {
+      writeJson(response, 405, { error: "Method not allowed." });
       return;
     }
 
@@ -65,6 +73,15 @@ export async function handleLocusWebRequest(
   }
 }
 
+function saveApplication(dbPath: string | undefined, input: ReturnType<typeof applicationInputSchema.parse>) {
+  const db = openDatabase(dbPath);
+  try {
+    return upsertApplication(db, input);
+  } finally {
+    db.close();
+  }
+}
+
 function buildSnapshot(dbPath?: string): Record<string, unknown> {
   const db = openDatabase(dbPath);
   try {
@@ -72,6 +89,14 @@ function buildSnapshot(dbPath?: string): Record<string, unknown> {
   } finally {
     db.close();
   }
+}
+
+async function readBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf8");
 }
 
 function ensureDatabase(dbPath?: string): void {

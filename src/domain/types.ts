@@ -1,5 +1,6 @@
 import type {
   CandidateStatus,
+  ApplicationStage,
   CompanyStatus,
   MemoryKind,
   NoteKind,
@@ -100,6 +101,19 @@ export type Role = {
   fitScore: NullableScore;
   fitAssessment: string | null;
   lastCheckedAt: Timestamp | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type Application = {
+  id: number;
+  targetType: "company" | "role";
+  targetId: number;
+  stage: ApplicationStage;
+  nextAction: string | null;
+  nextActionAt: Timestamp | null;
+  lastContactedAt: Timestamp | null;
+  notes: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

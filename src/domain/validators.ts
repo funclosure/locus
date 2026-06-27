@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  applicationStages,
   companyStatuses,
   candidateStatuses,
   memoryKinds,
@@ -55,6 +56,16 @@ export const roleInputSchema = z.object({
   fitAssessment: nullableTrimmedString,
 });
 
+export const applicationInputSchema = z.object({
+  targetType: z.enum(["company", "role"]),
+  targetId: z.coerce.number().int().positive(),
+  stage: z.enum(applicationStages).default("researching"),
+  nextAction: nullableTrimmedString,
+  nextActionAt: nullableTrimmedString,
+  lastContactedAt: nullableTrimmedString,
+  notes: nullableTrimmedString,
+});
+
 export const noteInputSchema = z.object({
   sessionId: z.coerce.number().int().positive().nullable().optional().default(null),
   targetType: z.enum(targetTypes).nullable().optional().default(null),
@@ -94,6 +105,7 @@ export const preferenceCandidateInputSchema = z.object({
 export type SessionStartInput = z.infer<typeof sessionStartInputSchema>;
 export type CompanyInput = z.infer<typeof companyInputSchema>;
 export type RoleInput = z.infer<typeof roleInputSchema>;
+export type ApplicationInput = z.infer<typeof applicationInputSchema>;
 export type NoteInput = z.infer<typeof noteInputSchema>;
 export type EvidenceInput = z.infer<typeof evidenceInputSchema>;
 export type PreferenceCandidateInput = z.infer<typeof preferenceCandidateInputSchema>;

@@ -4,6 +4,18 @@ export type CompanyStatus = (typeof companyStatuses)[number];
 export const roleStatuses = ["researching", "interested", "applied", "rejected", "closed", "archived"] as const;
 export type RoleStatus = (typeof roleStatuses)[number];
 
+export const applicationStages = [
+  "researching",
+  "warm_intro",
+  "reached_out",
+  "applied",
+  "interviewing",
+  "offer",
+  "rejected",
+  "paused",
+] as const;
+export type ApplicationStage = (typeof applicationStages)[number];
+
 export const sessionStatuses = ["active", "paused", "completed", "archived"] as const;
 export type SessionStatus = (typeof sessionStatuses)[number];
 
