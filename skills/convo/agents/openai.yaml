@@ -1,0 +1,4 @@
+interface:
+  display_name: "Convo"
+  short_description: "Use a shared convo.md file for agent-to-agent turn taking."
+  default_prompt: "Use the convo skill to read the latest segment in convo.md and append a concise reply for the other agent."
