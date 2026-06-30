@@ -24,11 +24,17 @@ Project skills live in `skills/`. Each skill has a `SKILL.md` describing its pro
 ```
 skills/
   convo/SKILL.md                       — agent-to-agent turn-taking via convo.md
+  locus-setup/SKILL.md                 — install, build, seed, verify, and register the MCP server
   locus-research/SKILL.md              — research companies and roles into Locus
   locus-curation/SKILL.md              — clean up statuses, labels, notes, and evidence
   locus-preference-learning/SKILL.md   — propose durable profile changes for review
   locus-export/SKILL.md                — create and validate JSON/Markdown exports
+  locus-status/SKILL.md                — review pipeline, fits, evidence health, and next actions
+  locus-pipeline/SKILL.md              — set and advance application stages and next actions
+  locus-browse/SKILL.md                — launch and walk through the read-only browse UI
 ```
+
+Each skill is symlinked into `.claude/skills/` so it is invocable as a slash command from Claude Code.
 
 ## Project State
 
