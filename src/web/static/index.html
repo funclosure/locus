@@ -8,24 +8,26 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="toolbar" aria-label="Browse controls">
-        <div>
-          <p class="eyebrow">Locus</p>
-          <h1>Research cockpit</h1>
+      <header class="topbar">
+        <div class="brand">
+          <span class="wordmark">Locus</span>
+          <span id="summary" class="counts"></span>
         </div>
-        <div class="filters">
-          <input id="search" type="search" placeholder="Search companies" autocomplete="off" />
-          <select id="statusFilter" aria-label="Status"></select>
-          <select id="labelFilter" aria-label="Label"></select>
-        </div>
-      </section>
-      <section class="workspace">
-        <aside class="sidebar" aria-label="Companies">
-          <div id="summary" class="summary-strip"></div>
-          <div id="companyList" class="company-list" aria-live="polite"></div>
-        </aside>
-        <section id="detailPanel" class="detail-panel" aria-label="Company detail"></section>
-      </section>
+      </header>
+      <div class="workspace">
+        <nav class="index" aria-label="Companies">
+          <div class="filters" aria-label="Browse controls">
+            <input id="search" type="search" placeholder="Search" autocomplete="off" />
+            <div class="filter-selects">
+              <select id="statusFilter" aria-label="Status"></select>
+              <select id="labelFilter" aria-label="Label"></select>
+            </div>
+          </div>
+          <div id="companyList" class="company-index" aria-live="polite"></div>
+        </nav>
+        <article id="detailPanel" class="reading" aria-label="Company detail"></article>
+        <aside id="profileRail" class="profile-rail" aria-label="Profile and direction"></aside>
+      </div>
     </main>
     <script type="module" src="/app.js"></script>
   </body>

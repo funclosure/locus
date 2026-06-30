@@ -13,6 +13,7 @@ const elements = {
   search: document.querySelector("#search"),
   status: document.querySelector("#statusFilter"),
   label: document.querySelector("#labelFilter"),
+  profile: document.querySelector("#profileRail"),
 };
 
 init();
@@ -26,6 +27,7 @@ async function init() {
     state.snapshot = await response.json();
     state.selectedCompanyId = state.snapshot.companies[0]?.id ?? null;
     bindFilters();
+    elements.profile.innerHTML = renderProfile();
     render();
   } catch (error) {
     elements.list.innerHTML = `<div class="error-state">${escapeHtml(error.message || "Unable to load Locus data.")}</div>`;
@@ -58,17 +60,15 @@ function render() {
   const selected = companies.find((company) => company.id === state.selectedCompanyId) ?? companies[0] ?? null;
   state.selectedCompanyId = selected?.id ?? null;
   elements.summary.innerHTML = renderSummary(companies);
-  elements.list.innerHTML = companies.length ? companies.map((company) => renderCompanyRow(company)).join("") : `<div class="empty-state">No matches.</div>`;
-  elements.detail.innerHTML = selected ? renderDetail(selected) : `<p>Select a company to inspect notes and evidence.</p>`;
+  elements.list.innerHTML = companies.length ? companies.map((company) => renderIndexRow(company)).join("") : `<div class="empty-state">No matches.</div>`;
+  elements.detail.innerHTML = selected ? renderDetail(selected) : `<div class="reading-inner"><p class="lede">Select a company to inspect notes and evidence.</p></div>`;
 
-  elements.list.querySelectorAll(".company-row").forEach((row) => {
+  elements.list.querySelectorAll(".index-row").forEach((row) => {
     row.addEventListener("click", () => {
       state.selectedCompanyId = Number(row.dataset.companyId);
       render();
     });
   });
-  const form = elements.detail.querySelector("#progressForm");
-  form?.addEventListener("submit", saveProgress);
 }
 
 function filteredCompanies() {
@@ -84,146 +84,159 @@ function filteredCompanies() {
 }
 
 function renderSummary(companies) {
-  const roles = state.snapshot.roles.length;
-  const evidence = state.snapshot.evidence.length;
-  return [
-    `<span class="metric">${companies.length} companies</span>`,
-    `<span class="metric">${roles} roles</span>`,
-    `<span class="metric">${evidence} evidence items</span>`,
-  ].join("");
+  return [count(companies.length, "company", "companies"), count(state.snapshot.roles.length, "role"), count(state.snapshot.evidence.length, "source")].join(
+    " · ",
+  );
 }
 
-function renderCompanyRow(company) {
-  const counts = companyCounts(company.id);
+function renderIndexRow(company) {
   const application = companyApplication(company.id);
   const selected = company.id === state.selectedCompanyId;
-  const pillClass = company.primaryLabel?.toLowerCase().includes("ai") ? "pill ai" : company.fitScore >= 0.85 ? "pill good" : "pill";
+  const sub = [company.primaryLabel || humanize(company.status), humanize(application?.stage || "not started")].filter(Boolean).join(" · ");
   return `
-    <button class="company-row" data-company-id="${company.id}" aria-selected="${selected}">
-      <div class="row-main">
-        <h2>${escapeHtml(company.name)}</h2>
-        <span class="fit">${formatScore(company.fitScore)}</span>
-      </div>
-      <div class="row-meta">
-        <span class="${pillClass}">${escapeHtml(company.primaryLabel || company.status)}</span>
-        <span class="stage">${escapeHtml(humanize(application?.stage || "not_started"))}</span>
-      </div>
-      <div class="tag-row">
-        <span class="tag">${escapeHtml(humanize(company.status))}</span>
-        <span class="tag">${counts.roles} roles</span>
-        <span class="tag">${counts.notes} notes</span>
-        <span class="tag">${counts.evidence} sources</span>
-      </div>
+    <button class="index-row" data-company-id="${company.id}" aria-selected="${selected}">
+      <span class="index-name">${escapeHtml(company.name)}</span>
+      <span class="index-fit">${formatScore(company.fitScore)}</span>
+      <span class="index-sub">${escapeHtml(sub)}</span>
     </button>
   `;
 }
 
 function renderDetail(company) {
+  const counts = companyCounts(company.id);
   const roles = state.snapshot.roles.filter((role) => role.companyId === company.id);
   const notes = state.snapshot.notes.filter((note) => note.targetType === "company" && note.targetId === company.id);
   const evidence = state.snapshot.evidence.filter((item) => item.targetType === "company" && item.targetId === company.id);
   const application = companyApplication(company.id);
   return `
-    <div class="detail-header">
-      <div>
-        <span class="pill">${escapeHtml(company.primaryLabel || company.status)}</span>
-        <h2>${escapeHtml(company.name)}</h2>
-        <p>${escapeHtml(company.fitAssessment || company.summary || "No assessment yet.")}</p>
-      </div>
-      <div class="score-block">
-        <span>${formatScore(company.fitScore)}</span>
-        <small>fit score</small>
-      </div>
+    <div class="reading-inner">
+      <header class="reading-head">
+        <p class="reading-eyebrow">${escapeHtml(company.primaryLabel || humanize(company.status))}</p>
+        <div class="reading-title-row">
+          <h2>${escapeHtml(company.name)}</h2>
+          <span class="reading-fit"><b>${formatScore(company.fitScore)}</b><small>fit</small></span>
+        </div>
+        <p class="reading-meta">${[humanize(company.status), count(counts.roles, "role"), count(counts.notes, "note"), count(counts.evidence, "source")].join(" · ")}</p>
+        ${renderHeaderLinks(company, evidence)}
+        <p class="lede">${escapeHtml(company.fitAssessment || company.summary || "No assessment yet.")}</p>
+      </header>
+      ${renderSection("Application", renderApplication(application))}
+      ${renderSection("Roles", listHtml(roles.map(roleItem)))}
+      ${renderSection("Notes", listHtml(notes.map((note) => escapeHtml(note.body))))}
+      ${renderSection("Evidence", listHtml(evidence.map(evidenceItem)))}
     </div>
-    ${renderProgressForm(company, application)}
-    ${renderList("Roles", roles.map((role) => `${role.title} · ${humanize(role.remotePolicy)} · ${formatScore(role.fitScore)}`))}
-    ${renderList("Notes", notes.map((note) => note.body))}
-    ${renderList("Evidence", evidence.map((item) => `${item.title || item.url}: ${item.snippet}`))}
   `;
 }
 
-function renderProgressForm(company, application) {
+function renderHeaderLinks(company, evidence) {
+  const links = [];
+  if (isHttpUrl(company.url)) {
+    links.push(externalLink(company.url, "Home"));
+  }
+  const careers = evidence.find((item) => isHttpUrl(item.url) && /careers?|jobs?/i.test(item.url));
+  if (careers) {
+    links.push(externalLink(careers.url, "Careers"));
+  }
+  return links.length ? `<p class="reading-links">${links.join("")}</p>` : "";
+}
+
+function roleItem(role) {
+  const meta = escapeHtml(`${humanize(role.remotePolicy)} · ${formatScore(role.fitScore)}`);
+  const title = isHttpUrl(role.url) ? externalLink(role.url, role.title) : escapeHtml(role.title);
+  return `${title} <span class="muted-inline">· ${meta}</span>`;
+}
+
+function evidenceItem(item) {
+  const label = item.title || item.url;
+  const head = isHttpUrl(item.url) ? externalLink(item.url, label) : escapeHtml(label);
+  return `${head}${item.snippet ? ` <span class="muted-inline">— ${escapeHtml(item.snippet)}</span>` : ""}`;
+}
+
+function externalLink(url, text) {
+  return `<a class="ext-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)}</a>`;
+}
+
+function isHttpUrl(url) {
+  return /^https?:\/\//i.test(String(url || ""));
+}
+
+function renderApplication(application) {
+  if (!application) {
+    return `<p class="muted-line">Not started.</p>`;
+  }
+  const meta = [
+    application.nextAction ? `next: ${application.nextAction}` : null,
+    application.nextActionAt ? `by ${application.nextActionAt}` : null,
+    application.lastContactedAt ? `last contacted ${application.lastContactedAt}` : null,
+  ].filter(Boolean);
   return `
-    <section class="detail-section progress-section">
-      <div class="section-heading">
-        <h3>Application progress</h3>
-        <span class="stage strong">${escapeHtml(humanize(application?.stage || "researching"))}</span>
+    <p class="app-line"><span class="stage-tag">${escapeHtml(humanize(application.stage))}</span>${meta.length ? `<span class="muted-line">${escapeHtml(meta.join(" · "))}</span>` : ""}</p>
+    ${application.notes ? `<p class="app-notes">${escapeHtml(application.notes)}</p>` : ""}
+  `;
+}
+
+function renderProfile() {
+  const profile = state.snapshot.profile;
+  if (!profile) {
+    return "";
+  }
+  const groups = [
+    { kind: "requirement", title: "Requirements" },
+    { kind: "interest", title: "Interested in" },
+    { kind: "positive_signal", title: "Green flags" },
+    { kind: "negative_signal", title: "Avoid" },
+    { kind: "constraint", title: "Constraints" },
+  ];
+  const preferences = state.snapshot.preferences || [];
+  const groupsHtml = groups
+    .map((group) => {
+      const items = preferences.filter((pref) => pref.kind === group.kind);
+      if (!items.length) {
+        return "";
+      }
+      const itemsHtml = items
+        .map(
+          (pref) => `
+            <div class="pref">
+              <div class="pref-label">${escapeHtml(pref.label)}</div>
+              ${pref.description ? `<div class="pref-desc">${escapeHtml(pref.description)}</div>` : ""}
+            </div>`,
+        )
+        .join("");
+      return `
+        <section class="rail-group${group.kind === "negative_signal" ? " is-avoid" : ""}">
+          <h3 class="rail-label">${group.title}</h3>
+          <div class="rail-items">${itemsHtml}</div>
+        </section>`;
+    })
+    .join("");
+  return `
+    <div class="rail-inner">
+      <div class="rail-identity">
+        <p class="rail-eyebrow">Profile</p>
+        <h2 class="rail-name">${escapeHtml(profile.name)}</h2>
+        <p class="rail-summary">${escapeHtml(profile.summary || "")}</p>
       </div>
-      <form id="progressForm" class="progress-form" data-company-id="${company.id}">
-        <label>
-          <span>Stage</span>
-          <select name="stage">
-            ${applicationStageOptions(application?.stage || "researching")}
-          </select>
-        </label>
-        <label>
-          <span>Next action</span>
-          <input name="nextAction" value="${escapeAttribute(application?.nextAction || "")}" placeholder="What should happen next?" />
-        </label>
-        <label>
-          <span>Next action date</span>
-          <input name="nextActionAt" type="date" value="${escapeAttribute(application?.nextActionAt || "")}" />
-        </label>
-        <label>
-          <span>Last contacted</span>
-          <input name="lastContactedAt" type="date" value="${escapeAttribute(application?.lastContactedAt || "")}" />
-        </label>
-        <label class="full">
-          <span>Progress notes</span>
-          <textarea name="notes" rows="3" placeholder="Current application context">${escapeHtml(application?.notes || "")}</textarea>
-        </label>
-        <button class="save-button" type="submit">Save progress</button>
-        <span id="progressStatus" class="save-status" aria-live="polite"></span>
-      </form>
-    </section>
+      ${groupsHtml}
+    </div>
   `;
 }
 
-async function saveProgress(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const status = form.querySelector("#progressStatus");
-  const formData = new FormData(form);
-  status.textContent = "Saving...";
-  const response = await fetch("/api/applications", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      targetType: "company",
-      targetId: Number(form.dataset.companyId),
-      stage: formData.get("stage"),
-      nextAction: emptyToNull(formData.get("nextAction")),
-      nextActionAt: emptyToNull(formData.get("nextActionAt")),
-      lastContactedAt: emptyToNull(formData.get("lastContactedAt")),
-      notes: emptyToNull(formData.get("notes")),
-    }),
-  });
-  if (!response.ok) {
-    status.textContent = "Save failed";
-    return;
-  }
-  const parsed = await response.json();
-  const index = state.snapshot.applications.findIndex(
-    (application) => application.targetType === parsed.application.targetType && application.targetId === parsed.application.targetId,
-  );
-  if (index >= 0) {
-    state.snapshot.applications[index] = parsed.application;
-  } else {
-    state.snapshot.applications.push(parsed.application);
-  }
-  status.textContent = "Saved";
-  render();
-}
-
-function renderList(title, items) {
+function renderSection(label, bodyHtml) {
   return `
-    <section class="detail-section">
-      <h3>${title}</h3>
-      <ul class="detail-list">
-        ${items.length ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join("") : "<li>None yet.</li>"}
-      </ul>
+    <section class="rsec">
+      <h3 class="rsec-label">${label}</h3>
+      <div class="rsec-body">${bodyHtml}</div>
     </section>
   `;
+}
+
+// items are already-escaped HTML strings
+function listHtml(items) {
+  if (!items.length) {
+    return `<p class="muted-line">None yet.</p>`;
+  }
+  return `<ul class="detail-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
 }
 
 function companyApplication(companyId) {
@@ -238,12 +251,6 @@ function companyCounts(companyId) {
   };
 }
 
-function applicationStageOptions(selected) {
-  return ["researching", "warm_intro", "reached_out", "applied", "interviewing", "offer", "rejected", "paused"]
-    .map((stage) => `<option value="${stage}" ${stage === selected ? "selected" : ""}>${escapeHtml(humanize(stage))}</option>`)
-    .join("");
-}
-
 function option(value, label) {
   return `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`;
 }
@@ -256,8 +263,12 @@ function humanize(value) {
   return String(value).replaceAll("_", " ");
 }
 
+function count(n, singular, plural) {
+  return `${n} ${n === 1 ? singular : plural || `${singular}s`}`;
+}
+
 function formatScore(score) {
-  return typeof score === "number" ? `${Math.round(score * 100)}%` : "unscored";
+  return typeof score === "number" ? `${Math.round(score * 100)}%` : "—";
 }
 
 function escapeHtml(value) {
@@ -267,13 +278,4 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-function escapeAttribute(value) {
-  return escapeHtml(value);
-}
-
-function emptyToNull(value) {
-  const stringValue = String(value || "").trim();
-  return stringValue ? stringValue : null;
 }
