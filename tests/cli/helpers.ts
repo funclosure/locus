@@ -1,4 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 
 let built = false;
 
@@ -7,11 +8,15 @@ function ensureCliBuilt(): void {
     return;
   }
 
-  execFileSync("pnpm", ["build"], {
-    cwd: process.cwd(),
-    encoding: "utf8",
-    stdio: "pipe",
-  });
+  // The vitest global setup builds once before the suite; only fall back to a
+  // local build if dist/ is somehow missing (e.g. running a file in isolation).
+  if (!existsSync("dist/cli/index.js")) {
+    execFileSync("pnpm", ["build"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+  }
   built = true;
 }
 

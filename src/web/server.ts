@@ -8,6 +8,7 @@ import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
 import { applicationInputSchema } from "../domain/validators.js";
 import { upsertApplication } from "../repositories/applicationRepository.js";
+import { runChat } from "./chat.js";
 
 export type LocusWebServerOptions = {
   dbPath?: string;
@@ -57,6 +58,19 @@ export async function handleLocusWebRequest(
     if (request.method === "POST" && url.pathname === "/api/applications") {
       const input = applicationInputSchema.parse(JSON.parse(await readBody(request)));
       writeJson(response, 200, { application: saveApplication(options.dbPath, input) });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/chat") {
+      const body = JSON.parse(await readBody(request)) as { message?: unknown; companyId?: unknown };
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      if (!message) {
+        writeJson(response, 400, { error: "Empty message." });
+        return;
+      }
+      const companyId = typeof body.companyId === "number" ? body.companyId : null;
+      const result = await runChat(message, companyId, options.dbPath);
+      writeJson(response, 200, result);
       return;
     }
 

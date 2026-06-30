@@ -25,9 +25,24 @@
             </div>
           </div>
           <div id="companyList" class="company-index" aria-live="polite"></div>
+          <div class="composer" id="composer">
+            <form id="chatForm" class="command-bar">
+              <input id="chatInput" type="text" placeholder="tell me what you think…" autocomplete="off" />
+              <kbd class="command-hint">/</kbd>
+            </form>
+          </div>
         </nav>
         <article id="detailPanel" class="reading" aria-label="Company detail"></article>
         <aside id="profileRail" class="profile-rail" aria-label="Profile and direction"></aside>
+      </div>
+      <div id="chatOverlay" class="chat-overlay" hidden>
+        <section class="chat-card" aria-label="Quick chat">
+          <header class="chat-head">
+            <span class="chat-title">Tell me</span>
+            <button type="button" id="chatClose" class="chat-close" aria-label="Close">×</button>
+          </header>
+          <div id="chatLog" class="chat-log" aria-live="polite"></div>
+        </section>
       </div>
     </main>
     <script type="module" src="/app.js"></script>

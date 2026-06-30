@@ -29,6 +29,7 @@ async function init() {
     bindFilters();
     elements.profile.innerHTML = renderProfile();
     render();
+    initChat();
   } catch (error) {
     elements.list.innerHTML = `<div class="error-state">${escapeHtml(error.message || "Unable to load Locus data.")}</div>`;
     elements.detail.innerHTML = "";
@@ -159,6 +160,117 @@ function externalLink(url, text) {
 
 function isHttpUrl(url) {
   return /^https?:\/\//i.test(String(url || ""));
+}
+
+// ── quick-chat overlay: feedback in, model-applied edits out ──
+function initChat() {
+  const overlay = document.querySelector("#chatOverlay");
+  const log = document.querySelector("#chatLog");
+  const form = document.querySelector("#chatForm");
+  const input = document.querySelector("#chatInput");
+  const close = document.querySelector("#chatClose");
+
+  function open() {
+    overlay.hidden = false;
+    scroll();
+  }
+  function shut() {
+    overlay.hidden = true;
+  }
+  function scroll() {
+    log.scrollTop = log.scrollHeight;
+  }
+  function bubble(role, html) {
+    const el = document.createElement("div");
+    el.className = `chat-msg ${role}`;
+    el.innerHTML = role === "user" ? `<span class="chat-bubble">${html}</span>` : html;
+    log.appendChild(el);
+    scroll();
+    return el;
+  }
+
+  // "/" anywhere (when not typing) opens the panel and focuses the bar
+  document.addEventListener("keydown", (event) => {
+    const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
+    if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      input.focus();
+    } else if (event.key === "Escape" && !overlay.hidden) {
+      shut();
+    }
+  });
+  // focusing the bar reopens the transcript if there's history
+  input.addEventListener("focus", () => {
+    if (log.childElementCount) {
+      open();
+    }
+  });
+  // click the dim backdrop (outside the card) to dismiss
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      shut();
+    }
+  });
+  close.addEventListener("click", shut);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = input.value.trim();
+    if (!message) {
+      return;
+    }
+    input.value = "";
+    open();
+    bubble("user", escapeHtml(message));
+    const pending = bubble("assistant", `<span class="chat-thinking">thinking…</span>`);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message, companyId: state.selectedCompanyId }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        pending.innerHTML = `<span class="chat-error">${escapeHtml(data.error || "Chat is unavailable.")}</span>`;
+        return;
+      }
+      pending.innerHTML = renderChatReply(data);
+      scroll();
+      if ((data.edits && data.edits.length) || (data.proposed && data.proposed.length)) {
+        await refreshSnapshot();
+      }
+    } catch (error) {
+      pending.innerHTML = `<span class="chat-error">${escapeHtml(error.message || "Request failed.")}</span>`;
+    }
+  });
+}
+
+function renderChatReply(data) {
+  const lines = [];
+  if (data.reply) {
+    lines.push(escapeHtml(data.reply));
+  }
+  const edits = (data.edits || []).map((edit) => `<div class="chat-edit">${escapeHtml(edit)}</div>`);
+  const proposed = (data.proposed || []).map((item) => `<div class="chat-edit proposed">${escapeHtml(item)} (needs your approval)</div>`);
+  if (edits.length || proposed.length) {
+    lines.push(`<div class="chat-edits">${edits.join("")}${proposed.join("")}</div>`);
+  }
+  return lines.join("");
+}
+
+async function refreshSnapshot() {
+  try {
+    const response = await fetch("/api/snapshot");
+    if (!response.ok) {
+      return;
+    }
+    state.snapshot = await response.json();
+    elements.profile.innerHTML = renderProfile();
+    render();
+  } catch {
+    // keep the current view if the refresh fails
+  }
 }
 
 function renderApplication(application) {
