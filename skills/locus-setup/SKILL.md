@@ -27,16 +27,25 @@ Bring a fresh or freshly-cloned Locus checkout to a working state: dependencies 
    pnpm build
    ```
 
-3. **Initialize the database.** The CLI migrates and seeds automatically on first use, but you can do it explicitly:
+3. **Set your profile.** The seed reads `profile.json` (your personal copy, gitignored) and falls back to the committed `profile.example.json` template. To make Locus yours:
+
+   ```bash
+   cp profile.example.json profile.json
+   # edit profile.json — your name, a one-line summary, and your preferences
+   ```
+
+   You can skip this and the example profile is used; edit `profile.json` later and re-run `pnpm db:seed` to apply name/summary changes.
+
+4. **Initialize the database.** The CLI migrates and seeds automatically on first use, but you can do it explicitly:
 
    ```bash
    pnpm db:migrate
    pnpm db:seed
    ```
 
-   The database lives at `.locus/locus.sqlite` (override with `LOCUS_DB_PATH`). It is gitignored.
+   The database lives at `.locus/locus.sqlite` (override with `LOCUS_DB_PATH`). It and `profile.json` are gitignored — your research and profile never get committed.
 
-4. **Verify the toolchain.**
+5. **Verify the toolchain.**
 
    ```bash
    pnpm run check
@@ -45,11 +54,15 @@ Bring a fresh or freshly-cloned Locus checkout to a working state: dependencies 
 
    Both should be green before proceeding.
 
-5. **Confirm the seed profile loads.**
+6. **Confirm the profile loads.**
 
    ```bash
    pnpm locus profile show --json
    ```
+
+## Note: the browse-UI chat
+
+`pnpm web` serves the cockpit, including the `/`-activated chat bar that turns feedback into edits. That chat authenticates through the user's **Claude Code login** (via `@anthropic-ai/claude-agent-sdk`) — no API key needed, but Claude Code must be installed and signed in. Browsing and the CLI work without it.
 
 ## Optional: register the MCP server
 

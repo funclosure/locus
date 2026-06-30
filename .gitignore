@@ -7,3 +7,6 @@ dist/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# personal profile — copy profile.example.json to profile.json and edit it
+profile.json

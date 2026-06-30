@@ -1,0 +1,11 @@
+{
+  "name": "Your Name",
+  "summary": "One or two sentences about you: your role, the kinds of companies and roles you're targeting, and what makes a strong fit. Copy this file to profile.json and edit it to make Locus yours.",
+  "preferences": [
+    { "kind": "requirement", "label": "Remote-friendly", "description": "Remote or remote-friendly work is required.", "weight": 1, "source": "manual" },
+    { "kind": "interest", "label": "A product area you care about", "description": "Replace with a domain that excites you — e.g. developer tools, fintech, health, climate.", "weight": 0.8, "source": "manual" },
+    { "kind": "positive_signal", "label": "Small, high-craft teams", "description": "Prefers small teams with strong engineering and product craft.", "weight": 0.85, "source": "manual" },
+    { "kind": "negative_signal", "label": "Something to avoid", "description": "Replace with a pattern you want to steer clear of — e.g. pure body-shopping, no room for product taste.", "weight": 0.9, "source": "manual" },
+    { "kind": "constraint", "label": "A soft constraint", "description": "Replace with a limit that isn't an absolute requirement.", "weight": 0.5, "source": "manual" }
+  ]
+}

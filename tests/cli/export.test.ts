@@ -41,7 +41,7 @@ describe("export CLI", () => {
 
     const exported = JSON.parse(runCli(["export", "json"], dbPath));
 
-    expect(exported.profile.name).toBe("Victor");
+    expect(exported.profile.name).toBeTruthy();
     expect(exported.companies[0].name).toBe("Bear");
     expect(exported.roles[0].title).toBe("Senior iOS Engineer");
     expect(exported.notes[0].body).toContain("remote");
