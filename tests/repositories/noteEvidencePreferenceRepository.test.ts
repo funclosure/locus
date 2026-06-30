@@ -6,8 +6,8 @@ import { openDatabase } from "../../src/db/client.js";
 import { migrateDatabase } from "../../src/db/migrate.js";
 import { seedDefaultProfile } from "../../src/db/seed.js";
 import { addCompany } from "../../src/repositories/companyRepository.js";
-import { addEvidence, listEvidence } from "../../src/repositories/evidenceRepository.js";
-import { addNote, listNotes } from "../../src/repositories/noteRepository.js";
+import { addEvidence, deleteEvidence, listEvidence } from "../../src/repositories/evidenceRepository.js";
+import { addNote, deleteNote, listNotes, updateNote } from "../../src/repositories/noteRepository.js";
 import {
   approvePreferenceCandidate,
   proposePreferenceCandidate,
@@ -59,6 +59,44 @@ describe("note, evidence, and preference repositories", () => {
 
     expect(note.id).toBe(1);
     expect(notes[0]?.body).toContain("GoodNotes");
+  });
+
+  it("updates and deletes notes and evidence", () => {
+    const db = setupDb();
+    const company = addCompany(db, {
+      name: "Craft",
+      status: "researching",
+      fitScore: null,
+      fitAssessment: null,
+      hq: null,
+      primaryLabel: null,
+      summary: null,
+      url: null,
+    });
+    const note = addNote(db, { sessionId: null, targetType: "company", targetId: company.id, title: null, body: "Old text.", kind: "observation" });
+    const evidence = addEvidence(db, {
+      targetType: "company",
+      targetId: company.id,
+      url: "https://craft.do",
+      title: null,
+      snippet: "Notes app.",
+      sourceType: "company_site",
+      confidence: null,
+    });
+
+    const updated = updateNote(db, note.id, { body: "New text.", kind: "decision" });
+    const removedNote = deleteNote(db, note.id);
+    const removedEvidence = deleteEvidence(db, evidence.id);
+    const notesLeft = listNotes(db, { targetType: "company", targetId: company.id });
+    const evidenceLeft = listEvidence(db, { targetType: "company", targetId: company.id });
+    db.close();
+
+    expect(updated.body).toBe("New text.");
+    expect(updated.kind).toBe("decision");
+    expect(removedNote).toBe(true);
+    expect(removedEvidence).toBe(true);
+    expect(notesLeft).toHaveLength(0);
+    expect(evidenceLeft).toHaveLength(0);
   });
 
   it("adds and lists evidence", () => {

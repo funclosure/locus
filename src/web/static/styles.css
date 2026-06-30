@@ -162,39 +162,31 @@ input::placeholder {
   position: sticky;
 }
 
+/* the docked bar is a trigger — clicking it opens the panel */
 .command-bar {
   align-items: center;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: 10px;
+  cursor: pointer;
   display: flex;
   gap: 8px;
+  height: 40px;
+  justify-content: space-between;
   padding: 0 10px;
+  text-align: left;
   transition: border-color 140ms ease;
+  width: 100%;
 }
 
-.command-bar:focus-within {
+.command-bar:hover {
   border-color: var(--accent-line);
 }
 
-.command-bar input {
-  background: none;
-  border: 0;
-  color: var(--text);
-  flex: 1;
+.command-placeholder {
+  color: var(--text-3);
   font: inherit;
   font-size: 13px;
-  height: 38px;
-  min-width: 0;
-  padding: 0;
-}
-
-.command-bar input:focus {
-  outline: none;
-}
-
-.command-bar input::placeholder {
-  color: var(--text-3);
 }
 
 .command-hint {
@@ -253,6 +245,32 @@ input::placeholder {
   font-weight: 600;
   letter-spacing: 1.2px;
   text-transform: uppercase;
+}
+
+.chat-actions {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.chat-action {
+  background: none;
+  border: 0;
+  color: var(--text-3);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.chat-action:hover {
+  color: var(--text);
+}
+
+.chat-action.is-armed {
+  color: var(--accent-bright);
 }
 
 .chat-close {
@@ -327,6 +345,125 @@ input::placeholder {
   color: var(--accent-bright);
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* context indicator — which company the chat is acting on */
+.chat-head-title {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chat-context {
+  color: var(--accent-bright);
+  font-size: 11px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-context::before {
+  color: var(--text-ghost);
+  content: "· ";
+}
+
+/* input lives inside the panel */
+.chat-composer {
+  align-items: center;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.chat-composer input {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text);
+  flex: 1;
+  font: inherit;
+  font-size: 13px;
+  height: 34px;
+  min-width: 0;
+  padding: 0 10px;
+  transition: border-color 140ms ease;
+}
+
+.chat-composer input:focus {
+  border-color: var(--accent-line);
+  outline: none;
+}
+
+.chat-composer input::placeholder {
+  color: var(--text-3);
+}
+
+.chat-send {
+  background: var(--accent);
+  border: 0;
+  border-radius: 8px;
+  color: #1a1816;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  height: 34px;
+  padding: 0 12px;
+  transition: background 140ms ease;
+}
+
+.chat-send:hover {
+  background: var(--accent-bright);
+}
+
+/* approve / dismiss a proposed preference inline */
+.chat-edit.proposed {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pref-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.pref-btn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  color: var(--text-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 9px;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.pref-btn[data-action="approve"]:hover {
+  border-color: var(--accent-line);
+  color: var(--accent-bright);
+}
+
+.pref-btn[data-action="reject"]:hover {
+  color: var(--text);
+}
+
+.pref-resolved {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.rail-group.is-pending .rail-label {
+  color: var(--accent-bright);
+}
+
+.pref .pref-actions {
+  margin-top: 6px;
 }
 
 @keyframes chat-pulse {

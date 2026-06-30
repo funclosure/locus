@@ -33,6 +33,10 @@ export function getEvidence(db: Database.Database, id: number): Evidence | null 
   return row ? mapEvidence(row) : null;
 }
 
+export function deleteEvidence(db: Database.Database, id: number): boolean {
+  return db.prepare("delete from evidence where id = ?").run(id).changes > 0;
+}
+
 export function listEvidence(
   db: Database.Database,
   filters: { targetType?: Evidence["targetType"]; targetId?: number } = {},

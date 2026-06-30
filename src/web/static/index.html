@@ -26,10 +26,10 @@
           </div>
           <div id="companyList" class="company-index" aria-live="polite"></div>
           <div class="composer" id="composer">
-            <form id="chatForm" class="command-bar">
-              <input id="chatInput" type="text" placeholder="tell me what you think…" autocomplete="off" />
+            <button type="button" id="chatTrigger" class="command-bar">
+              <span class="command-placeholder">tell me what you think…</span>
               <kbd class="command-hint">/</kbd>
-            </form>
+            </button>
           </div>
         </nav>
         <article id="detailPanel" class="reading" aria-label="Company detail"></article>
@@ -38,10 +38,20 @@
       <div id="chatOverlay" class="chat-overlay" hidden>
         <section class="chat-card" aria-label="Quick chat">
           <header class="chat-head">
-            <span class="chat-title">Tell me</span>
-            <button type="button" id="chatClose" class="chat-close" aria-label="Close">×</button>
+            <div class="chat-head-title">
+              <span class="chat-title">Tell me</span>
+              <span id="chatContext" class="chat-context"></span>
+            </div>
+            <div class="chat-actions">
+              <button type="button" id="chatClear" class="chat-action">Clear</button>
+              <button type="button" id="chatClose" class="chat-close" aria-label="Close">×</button>
+            </div>
           </header>
           <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <form id="chatForm" class="chat-composer">
+            <input id="chatInput" type="text" placeholder="tell me what you think…" autocomplete="off" />
+            <button type="submit" class="chat-send" aria-label="Send">↵</button>
+          </form>
         </section>
       </div>
     </main>

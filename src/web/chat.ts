@@ -14,8 +14,8 @@ import {
 } from "../domain/validators.js";
 import { upsertApplication } from "../repositories/applicationRepository.js";
 import { getCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
-import { addEvidence } from "../repositories/evidenceRepository.js";
-import { addNote, listNotes } from "../repositories/noteRepository.js";
+import { addEvidence, deleteEvidence } from "../repositories/evidenceRepository.js";
+import { addNote, deleteNote, listNotes, updateNote } from "../repositories/noteRepository.js";
 import { proposePreferenceCandidate } from "../repositories/preferenceCandidateRepository.js";
 import { getDefaultProfile, listProfilePreferences } from "../repositories/profileRepository.js";
 import { listRoles, updateRole } from "../repositories/roleRepository.js";
@@ -25,7 +25,7 @@ import { listEvidence } from "../repositories/evidenceRepository.js";
 export type ChatResult = {
   reply: string;
   edits: string[];
-  proposed: string[];
+  proposed: Array<{ id: number; label: string }>;
 };
 
 const target = {
@@ -39,7 +39,7 @@ function ok(text: string) {
 
 export async function runChat(message: string, companyId: number | null, dbPath?: string): Promise<ChatResult> {
   const edits: string[] = [];
-  const proposed: string[] = [];
+  const proposed: Array<{ id: number; label: string }> = [];
 
   const withDb = <T>(fn: (db: Database.Database) => T): T => {
     const db = openDatabase(dbPath);
@@ -111,6 +111,34 @@ export async function runChat(message: string, companyId: number | null, dbPath?
           }),
       ),
       tool(
+        "update_note",
+        "Edit an existing note's text or kind by id. Use when the user wants to revise a note rather than add a new one. Note ids are listed in the selected-company context.",
+        {
+          id: z.number().int().positive().describe("Note id"),
+          body: z.string().optional().describe("Replacement note text"),
+          kind: z.enum(["observation", "decision", "question", "summary"]).optional(),
+        },
+        async ({ id, ...rest }) =>
+          withDb((db) => {
+            const note = updateNote(db, id, noteInputSchema.partial().parse(rest));
+            edits.push(`Edited note ${note.id}`);
+            return ok(`Updated note ${note.id}.`);
+          }),
+      ),
+      tool(
+        "delete_note",
+        "Delete a note by id. Use when the user wants to remove a note. Note ids are listed in the selected-company context.",
+        { id: z.number().int().positive().describe("Note id") },
+        async ({ id }) =>
+          withDb((db) => {
+            if (!deleteNote(db, id)) {
+              throw new Error(`Note ${id} not found.`);
+            }
+            edits.push(`Deleted note ${id}`);
+            return ok(`Deleted note ${id}.`);
+          }),
+      ),
+      tool(
         "add_evidence",
         "Add source-backed evidence for a company or role (a URL plus a snippet). Use when the user cites a fact with a source.",
         {
@@ -126,6 +154,19 @@ export async function runChat(message: string, companyId: number | null, dbPath?
             const item = addEvidence(db, evidenceInputSchema.parse(args));
             edits.push(`Added evidence on ${args.targetType}:${args.targetId}`);
             return ok(`Added evidence ${item.id}.`);
+          }),
+      ),
+      tool(
+        "delete_evidence",
+        "Delete an evidence item by id. Evidence ids are listed in the selected-company context.",
+        { id: z.number().int().positive().describe("Evidence id") },
+        async ({ id }) =>
+          withDb((db) => {
+            if (!deleteEvidence(db, id)) {
+              throw new Error(`Evidence ${id} not found.`);
+            }
+            edits.push(`Deleted evidence ${id}`);
+            return ok(`Deleted evidence ${id}.`);
           }),
       ),
       tool(
@@ -159,7 +200,7 @@ export async function runChat(message: string, companyId: number | null, dbPath?
           withDb((db) => {
             const sessionId = ensureSessionId(db);
             const candidate = proposePreferenceCandidate(db, preferenceCandidateInputSchema.parse({ ...args, sessionId, profileId: "1" }));
-            proposed.push(candidate.label);
+            proposed.push({ id: candidate.id, label: candidate.label });
             return ok(`Proposed preference "${candidate.label}" for the user's approval (pending).`);
           }),
       ),
@@ -177,7 +218,10 @@ export async function runChat(message: string, companyId: number | null, dbPath?
         "mcp__locus__update_company",
         "mcp__locus__update_role",
         "mcp__locus__add_note",
+        "mcp__locus__update_note",
+        "mcp__locus__delete_note",
         "mcp__locus__add_evidence",
+        "mcp__locus__delete_evidence",
         "mcp__locus__set_application",
         "mcp__locus__propose_preference",
       ],
@@ -251,8 +295,8 @@ function buildSystemPrompt(db: Database.Database, companyId: number | null): str
         `Selected company (id ${company.id}): ${company.name}${company.maker ? ` — by ${company.maker}` : ""} [status: ${company.status}, label: ${company.primaryLabel ?? "—"}, fit: ${company.fitScore ?? "—"}]`,
         company.fitAssessment || company.summary ? `  assessment: ${company.fitAssessment || company.summary}` : "",
         roles.length ? `  roles: ${roles.map((r) => `${r.id}:${r.title}`).join(", ")}` : "  roles: none",
-        notes.length ? `  notes: ${notes.map((n) => n.body).join(" | ")}` : "  notes: none",
-        evidence.length ? `  evidence: ${evidence.map((e) => e.url).join(", ")}` : "  evidence: none",
+        notes.length ? `  notes: ${notes.map((n) => `[id ${n.id}] ${n.body}`).join(" | ")}` : "  notes: none",
+        evidence.length ? `  evidence: ${evidence.map((e) => `[id ${e.id}] ${e.url}`).join(" | ")}` : "  evidence: none",
       );
     }
   }

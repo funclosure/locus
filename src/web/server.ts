@@ -8,6 +8,7 @@ import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
 import { applicationInputSchema } from "../domain/validators.js";
 import { upsertApplication } from "../repositories/applicationRepository.js";
+import { approvePreferenceCandidate, rejectPreferenceCandidate } from "../repositories/preferenceCandidateRepository.js";
 import { runChat } from "./chat.js";
 
 export type LocusWebServerOptions = {
@@ -71,6 +72,23 @@ export async function handleLocusWebRequest(
       const companyId = typeof body.companyId === "number" ? body.companyId : null;
       const result = await runChat(message, companyId, options.dbPath);
       writeJson(response, 200, result);
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/preference") {
+      const body = JSON.parse(await readBody(request)) as { id?: unknown; action?: unknown };
+      const id = Number(body.id);
+      if (!Number.isInteger(id) || (body.action !== "approve" && body.action !== "reject")) {
+        writeJson(response, 400, { error: "Expected { id, action: 'approve' | 'reject' }." });
+        return;
+      }
+      const db = openDatabase(options.dbPath);
+      try {
+        const preference = body.action === "approve" ? approvePreferenceCandidate(db, id) : rejectPreferenceCandidate(db, id);
+        writeJson(response, 200, { preference });
+      } finally {
+        db.close();
+      }
       return;
     }
 

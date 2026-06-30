@@ -47,6 +47,29 @@ export function listNotes(db: Database.Database, filters: { targetType?: Note["t
   return (db.prepare(`select * from notes${where} order by id`).all(...values) as NoteRow[]).map(mapNote);
 }
 
+export function updateNote(db: Database.Database, id: number, input: Partial<Pick<NoteInput, "title" | "body" | "kind">>): Note {
+  const current = getNote(db, id);
+  if (!current) {
+    throw new Error(`Note ${id} not found.`);
+  }
+  const next = {
+    title: input.title ?? current.title,
+    body: input.body ?? current.body,
+    kind: input.kind ?? current.kind,
+    updatedAt: new Date().toISOString(),
+  };
+  db.prepare("update notes set title = ?, body = ?, kind = ?, updated_at = ? where id = ?").run(next.title, next.body, next.kind, next.updatedAt, id);
+  const updated = getNote(db, id);
+  if (!updated) {
+    throw new Error(`Note ${id} not found after update.`);
+  }
+  return updated;
+}
+
+export function deleteNote(db: Database.Database, id: number): boolean {
+  return db.prepare("delete from notes where id = ?").run(id).changes > 0;
+}
+
 function mapNote(row: NoteRow): Note {
   return {
     id: row.id,

@@ -30,6 +30,7 @@ async function init() {
     elements.profile.innerHTML = renderProfile();
     render();
     initChat();
+    initProfileApprovals();
   } catch (error) {
     elements.list.innerHTML = `<div class="error-state">${escapeHtml(error.message || "Unable to load Locus data.")}</div>`;
     elements.detail.innerHTML = "";
@@ -165,13 +166,19 @@ function isHttpUrl(url) {
 // ── quick-chat overlay: feedback in, model-applied edits out ──
 function initChat() {
   const overlay = document.querySelector("#chatOverlay");
+  const trigger = document.querySelector("#chatTrigger");
+  const context = document.querySelector("#chatContext");
   const log = document.querySelector("#chatLog");
   const form = document.querySelector("#chatForm");
   const input = document.querySelector("#chatInput");
   const close = document.querySelector("#chatClose");
+  const clear = document.querySelector("#chatClear");
 
   function open() {
+    const company = state.snapshot.companies.find((item) => item.id === state.selectedCompanyId);
+    context.textContent = company ? company.name : "all companies";
     overlay.hidden = false;
+    input.focus();
     scroll();
   }
   function shut() {
@@ -189,29 +196,78 @@ function initChat() {
     return el;
   }
 
-  // "/" anywhere (when not typing) opens the panel and focuses the bar
+  // the docked bar is a trigger; "/" opens the panel too — typing happens in the panel
+  trigger.addEventListener("click", open);
   document.addEventListener("keydown", (event) => {
     const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
     if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
       event.preventDefault();
-      input.focus();
+      open();
     } else if (event.key === "Escape" && !overlay.hidden) {
       shut();
     }
   });
-  // focusing the bar reopens the transcript if there's history
-  input.addEventListener("focus", () => {
-    if (log.childElementCount) {
-      open();
-    }
-  });
-  // click the dim backdrop (outside the card) to dismiss
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay) {
       shut();
     }
   });
   close.addEventListener("click", shut);
+
+  // Clear needs a confirm: first click arms it, second click clears, auto-reverts
+  let clearTimer = null;
+  function disarmClear() {
+    clearTimeout(clearTimer);
+    clear.classList.remove("is-armed");
+    clear.textContent = "Clear";
+    delete clear.dataset.armed;
+  }
+  clear.addEventListener("click", () => {
+    if (!log.childElementCount) {
+      return;
+    }
+    if (clear.dataset.armed) {
+      log.innerHTML = "";
+      disarmClear();
+      input.focus();
+      return;
+    }
+    clear.dataset.armed = "true";
+    clear.textContent = "Clear?";
+    clear.classList.add("is-armed");
+    clearTimer = setTimeout(disarmClear, 3000);
+  });
+
+  // approve / dismiss a proposed preference inline
+  log.addEventListener("click", async (event) => {
+    const button = event.target.closest(".pref-btn");
+    if (!button) {
+      return;
+    }
+    const row = button.closest(".chat-edit.proposed");
+    const id = Number(row?.dataset.pref);
+    const action = button.dataset.action;
+    if (!id || !action) {
+      return;
+    }
+    row.innerHTML = `<span class="pref-resolved">${action === "approve" ? "Approving…" : "Dismissing…"}</span>`;
+    try {
+      const response = await fetch("/api/preference", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id, action }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        row.innerHTML = `<span class="chat-error">${escapeHtml(data.error || "Could not update.")}</span>`;
+        return;
+      }
+      row.innerHTML = `<span class="pref-resolved">${action === "approve" ? "✓ Approved" : "✕ Dismissed"}: ${escapeHtml(data.preference.label)}</span>`;
+      await refreshSnapshot();
+    } catch (error) {
+      row.innerHTML = `<span class="chat-error">${escapeHtml(error.message || "Request failed.")}</span>`;
+    }
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -246,13 +302,46 @@ function initChat() {
   });
 }
 
+// approve / dismiss pending preference candidates from the profile rail
+function initProfileApprovals() {
+  elements.profile.addEventListener("click", async (event) => {
+    const button = event.target.closest(".pref-btn");
+    if (!button) {
+      return;
+    }
+    const id = Number(button.dataset.pref);
+    const action = button.dataset.action;
+    if (!id || !action) {
+      return;
+    }
+    button.closest(".pref-actions")?.querySelectorAll("button").forEach((el) => (el.disabled = true));
+    try {
+      const response = await fetch("/api/preference", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id, action }),
+      });
+      if (response.ok) {
+        await refreshSnapshot();
+      }
+    } catch {
+      // leave the rail as-is if the request fails
+    }
+  });
+}
+
 function renderChatReply(data) {
   const lines = [];
   if (data.reply) {
     lines.push(escapeHtml(data.reply));
   }
   const edits = (data.edits || []).map((edit) => `<div class="chat-edit">${escapeHtml(edit)}</div>`);
-  const proposed = (data.proposed || []).map((item) => `<div class="chat-edit proposed">${escapeHtml(item)} (needs your approval)</div>`);
+  const proposed = (data.proposed || []).map(
+    (item) =>
+      `<div class="chat-edit proposed" data-pref="${item.id}"><span>${escapeHtml(item.label)}</span>` +
+      `<span class="pref-actions"><button type="button" class="pref-btn" data-action="approve">Approve</button>` +
+      `<button type="button" class="pref-btn" data-action="reject">Dismiss</button></span></div>`,
+  );
   if (edits.length || proposed.length) {
     lines.push(`<div class="chat-edits">${edits.join("")}${proposed.join("")}</div>`);
   }
@@ -323,6 +412,28 @@ function renderProfile() {
         </section>`;
     })
     .join("");
+  const pending = (state.snapshot.preferenceCandidates || []).filter((candidate) => candidate.status === "pending");
+  const pendingHtml = pending.length
+    ? `
+        <section class="rail-group is-pending">
+          <h3 class="rail-label">Pending review</h3>
+          <div class="rail-items">
+            ${pending
+              .map(
+                (candidate) => `
+                  <div class="pref" data-pref="${candidate.id}">
+                    <div class="pref-label">${escapeHtml(candidate.label)}</div>
+                    ${candidate.description ? `<div class="pref-desc">${escapeHtml(candidate.description)}</div>` : ""}
+                    <div class="pref-actions">
+                      <button type="button" class="pref-btn" data-pref="${candidate.id}" data-action="approve">Approve</button>
+                      <button type="button" class="pref-btn" data-pref="${candidate.id}" data-action="reject">Dismiss</button>
+                    </div>
+                  </div>`,
+              )
+              .join("")}
+          </div>
+        </section>`
+    : "";
   return `
     <div class="rail-inner">
       <div class="rail-identity">
@@ -330,6 +441,7 @@ function renderProfile() {
         <h2 class="rail-name">${escapeHtml(profile.name)}</h2>
         <p class="rail-summary">${escapeHtml(profile.summary || "")}</p>
       </div>
+      ${pendingHtml}
       ${groupsHtml}
     </div>
   `;
