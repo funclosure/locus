@@ -1,5 +1,7 @@
 # Locus
 
+![Locus research cockpit](docs/cockpit.png)
+
 A local, agent-usable job-search knowledge system. Locus gives an AI agent a structured place to record research about companies and roles — backed by evidence — and gives you a quiet console to review, curate, and act on it. Your conversation stays in the chat; the durable memory lives in Locus.
 
 Everything runs locally against a single SQLite database. Nothing leaves your machine except the web pages you choose to open and the model calls the chat makes through your own Claude Code login.
