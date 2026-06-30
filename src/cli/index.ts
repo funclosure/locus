@@ -5,6 +5,7 @@ import { openDatabase } from "../db/client.js";
 import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
 import {
+  applicationInputSchema,
   companyInputSchema,
   evidenceInputSchema,
   noteInputSchema,
@@ -14,6 +15,7 @@ import {
 } from "../domain/validators.js";
 import { buildJsonExport } from "../export/json.js";
 import { buildMarkdownExport } from "../export/markdown.js";
+import { getApplication, listApplications, upsertApplication } from "../repositories/applicationRepository.js";
 import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
 import { recordExport } from "../repositories/exportRepository.js";
@@ -482,6 +484,69 @@ session
       } else {
         printText(`${found.id}: ${found.title} [${found.status}]`);
       }
+    } finally {
+      db.close();
+    }
+  });
+
+const application = program.command("application").description("Application pipeline commands");
+
+application
+  .command("set")
+  .description("Create or update pipeline progress for a target (upsert by target)")
+  .option("--target <target>", "Target ref like company:1 or role:2")
+  .option("--stage <stage>", "Pipeline stage")
+  .option("--next-action <nextAction>", "Next action description")
+  .option("--next-action-at <nextActionAt>", "Next action timestamp")
+  .option("--last-contacted-at <lastContactedAt>", "Last contacted timestamp")
+  .option("--notes <notes>", "Freeform notes")
+  .option("--stdin", "Read JSON object from stdin")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: Record<string, unknown> & { target?: string; json?: boolean }) => {
+    ensureDatabase();
+    const { target, ...rest } = options;
+    const ref = target ? parseTargetRef(String(target)) : {};
+    const input = applicationInputSchema.parse({ ...jsonPayload(rest), ...ref });
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const saved = upsertApplication(db, input);
+      if (options.json) printJson({ application: saved });
+      else printText(`Set ${saved.targetType}:${saved.targetId} application to ${saved.stage}`);
+    } finally {
+      db.close();
+    }
+  });
+
+application
+  .command("list")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const applications = listApplications(db);
+      if (options.json) printJson({ applications });
+      else applications.forEach((item) => printText(`${item.targetType}:${item.targetId} [${item.stage}]`));
+    } finally {
+      db.close();
+    }
+  });
+
+application
+  .command("show")
+  .requiredOption("--target <target>", "Target ref like company:1 or role:2")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { target: string; json?: boolean }) => {
+    ensureDatabase();
+    const ref = parseTargetRef(options.target);
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const found = getApplication(db, ref.targetType as "company" | "role", ref.targetId);
+      if (!found) {
+        throw new Error(`No application progress for ${options.target}.`);
+      }
+      if (options.json) printJson({ application: found });
+      else printText(`${found.targetType}:${found.targetId} [${found.stage}]`);
     } finally {
       db.close();
     }
