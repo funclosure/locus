@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "bin": {
-    "locus": "./dist/cli/index.js"
+    "locus": "./dist/cli/index.js",
+    "locus-mcp": "./dist/mcp/server.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -14,9 +15,12 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
     "locus": "tsx src/cli/index.ts",
-    "web": "node dist/web/server.js"
+    "web": "node dist/web/server.js",
+    "mcp": "node dist/mcp/server.js",
+    "mcp:dev": "tsx src/mcp/server.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^11.10.0",
     "commander": "^12.1.0",
     "zod": "^3.25.0"

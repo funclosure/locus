@@ -39,7 +39,9 @@ Phases 0–2 are complete and Phase 3 (browse UI) is at MVP.
 - **Browse UI (Phase 3, MVP):** `pnpm web` serves a static research cockpit (`src/web/static/`) backed by `GET /api/snapshot` (full JSON export) and `POST /api/applications`.
 - **Applications pipeline (beyond original plan):** the `applications` table (migration `0002`) tracks per-target pipeline `stage` and next actions, with one row per target (upsert by `target_type`/`target_id`). It has a repository, a `POST /api/applications` web endpoint, and a `locus application` CLI command (`set`/`list`/`show`) — see `docs/PLAN.md` for the data-model note.
 
-Not yet started: Phase 4 (MCP / local API) and Phase 5 (research automation).
+- **MCP server (Phase 4):** `src/mcp/` exposes all CLI operations as 24 MCP tools over stdio (`pnpm mcp`, bin `locus-mcp`), wrapping the same repositories with the same validators. See `docs/mcp.md` for the tool surface and agent registration.
+
+Not yet started: Phase 5 (research automation).
 
 Verify status with `pnpm run check` and `pnpm test` (all green as of last review).
 

@@ -430,21 +430,21 @@ Exit criteria:
 - The user can approve or reject preference candidates.
 - The user can edit notes and statuses.
 
-## Phase 4: MCP Or Local API
+## Phase 4: MCP Or Local API — ✅ MCP server done
 
 Goal: make Locus easier for agent surfaces to call directly.
 
 Deliverables:
 
-- MCP server or local HTTP API exposing the same operations as the CLI.
-- Tool schemas for core operations.
-- Agent integration docs.
-- Compatibility notes for Codex and Claude.
+- MCP server or local HTTP API exposing the same operations as the CLI. — done: stdio MCP server in `src/mcp/` (`pnpm mcp`, bin `locus-mcp`), 24 tools mirroring the CLI.
+- Tool schemas for core operations. — done: input schemas reuse the domain validators.
+- Agent integration docs. — done: `docs/mcp.md`.
+- Compatibility notes for Codex and Claude. — done: registration snippets for Claude Code, Claude Desktop, and Codex in `docs/mcp.md`.
 
 Exit criteria:
 
-- Agents can call Locus tools without shell command parsing.
-- CLI remains available for debugging and portability.
+- Agents can call Locus tools without shell command parsing. — met.
+- CLI remains available for debugging and portability. — met.
 
 ## Phase 5: Research Automation
 
