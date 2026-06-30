@@ -99,3 +99,7 @@ pnpm test               # vitest
 ## Status
 
 Phases 0–2 (data layer + CLI, skills) are complete; Phase 3 (browse UI) is past MVP with the chat console; Phase 4 (MCP server) is done. Phase 5 (research automation) is the open roadmap. Details in [`docs/PLAN.md`](docs/PLAN.md).
+
+## License
+
+[MIT](LICENSE) © 2026 Chungyun Lee
