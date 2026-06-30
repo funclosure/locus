@@ -137,6 +137,8 @@ function contentType(filePath: string): string {
       return "text/javascript; charset=utf-8";
     case ".html":
       return "text/html; charset=utf-8";
+    case ".svg":
+      return "image/svg+xml; charset=utf-8";
     default:
       return "application/octet-stream";
   }
