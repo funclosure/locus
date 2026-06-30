@@ -263,6 +263,12 @@ input::placeholder {
   text-transform: uppercase;
 }
 
+.reading-maker {
+  color: var(--text-2);
+  font-size: 13px;
+  margin: 5px 0 0;
+}
+
 .reading-meta {
   color: var(--text-3);
   font-size: 12px;

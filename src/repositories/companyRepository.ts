@@ -5,6 +5,7 @@ import type { CompanyInput } from "../domain/validators.js";
 type CompanyRow = {
   id: number;
   name: string;
+  maker: string | null;
   url: string | null;
   hq: string | null;
   summary: string | null;
@@ -26,11 +27,12 @@ export function addCompany(db: Database.Database, input: CompanyInput): Company 
   const result = db
     .prepare(
       `insert into companies
-        (name, url, hq, summary, primary_label, status, fit_score, fit_assessment, created_at, updated_at)
-       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (name, maker, url, hq, summary, primary_label, status, fit_score, fit_assessment, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       input.name,
+      input.maker ?? null,
       input.url,
       input.hq,
       input.summary,
@@ -67,6 +69,7 @@ export function updateCompany(db: Database.Database, id: number, input: CompanyU
   }
   const next = {
     name: input.name ?? current.name,
+    maker: input.maker ?? current.maker,
     url: input.url ?? current.url,
     hq: input.hq ?? current.hq,
     summary: input.summary ?? current.summary,
@@ -79,11 +82,12 @@ export function updateCompany(db: Database.Database, id: number, input: CompanyU
   };
   db.prepare(
     `update companies
-     set name = ?, url = ?, hq = ?, summary = ?, primary_label = ?, status = ?,
+     set name = ?, maker = ?, url = ?, hq = ?, summary = ?, primary_label = ?, status = ?,
          fit_score = ?, fit_assessment = ?, last_checked_at = ?, updated_at = ?
      where id = ?`,
   ).run(
     next.name,
+    next.maker,
     next.url,
     next.hq,
     next.summary,
@@ -106,6 +110,7 @@ function mapCompany(row: CompanyRow): Company {
   return {
     id: row.id,
     name: row.name,
+    maker: row.maker,
     url: row.url,
     hq: row.hq,
     summary: row.summary,

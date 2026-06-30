@@ -46,4 +46,36 @@ describe("companyRepository", () => {
     expect(companies).toHaveLength(1);
     expect(companies[0]?.name).toBe("Linear");
   });
+
+  it("stores a distinct maker and defaults it to null", () => {
+    const db = setupDb();
+
+    const product = addCompany(db, {
+      name: "Bear",
+      maker: "Shiny Frog",
+      url: "https://bear.app",
+      hq: null,
+      summary: "Apple-native markdown notes.",
+      primaryLabel: "Apple-native notes",
+      status: "watching",
+      fitScore: null,
+      fitAssessment: null,
+    });
+    const plain = addCompany(db, {
+      name: "Linear",
+      url: null,
+      hq: null,
+      summary: null,
+      primaryLabel: null,
+      status: "researching",
+      fitScore: null,
+      fitAssessment: null,
+    });
+    const renamedMaker = updateCompany(db, product.id, { maker: "Shiny Frog Srl" });
+    db.close();
+
+    expect(product.maker).toBe("Shiny Frog");
+    expect(plain.maker).toBeNull();
+    expect(renamedMaker.maker).toBe("Shiny Frog Srl");
+  });
 });

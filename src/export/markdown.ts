@@ -3,7 +3,7 @@ import { buildJsonExport } from "./json.js";
 
 type ExportData = {
   profile: { name: string; summary: string };
-  companies: Array<{ id: number; name: string; summary: string | null; primaryLabel: string | null; status: string }>;
+  companies: Array<{ id: number; name: string; maker: string | null; summary: string | null; primaryLabel: string | null; status: string }>;
   roles: Array<{ id: number; companyId: number; title: string; remotePolicy: string; status: string }>;
   notes: Array<{ targetType: string | null; targetId: number | null; body: string }>;
   evidence: Array<{ targetType: string; targetId: number; url: string; snippet: string }>;
@@ -22,7 +22,7 @@ export function buildMarkdownExport(db: Database.Database): string {
     "",
   ];
   for (const company of data.companies) {
-    lines.push(`### ${company.name}`);
+    lines.push(`### ${company.name}${company.maker ? ` — by ${company.maker}` : ""}`);
     lines.push("");
     if (company.primaryLabel) lines.push(`Label: ${company.primaryLabel}`);
     lines.push(`Status: ${company.status}`);

@@ -116,6 +116,7 @@ function renderDetail(company) {
           <h2>${escapeHtml(company.name)}</h2>
           <span class="reading-fit"><b>${formatScore(company.fitScore)}</b><small>fit</small></span>
         </div>
+        ${company.maker ? `<p class="reading-maker">by ${escapeHtml(company.maker)}</p>` : ""}
         <p class="reading-meta">${[humanize(company.status), count(counts.roles, "role"), count(counts.notes, "note"), count(counts.evidence, "source")].join(" · ")}</p>
         ${renderHeaderLinks(company, evidence)}
         <p class="lede">${escapeHtml(company.fitAssessment || company.summary || "No assessment yet.")}</p>

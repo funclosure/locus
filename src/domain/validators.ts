@@ -32,7 +32,8 @@ export const sessionStartInputSchema = z.object({
 });
 
 export const companyInputSchema = z.object({
-  name: trimmedString,
+  name: trimmedString.describe("Brand or product name — the prominent label (e.g. Bear)."),
+  maker: nullableTrimmedString.describe("Company behind the product, when different from the brand (e.g. Shiny Frog). Null when they are the same."),
   url: nullableTrimmedString,
   hq: nullableTrimmedString,
   summary: nullableTrimmedString,

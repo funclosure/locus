@@ -75,6 +75,7 @@ export type PreferenceCandidate = {
 export type Company = {
   id: number;
   name: string;
+  maker: string | null;
   url: string | null;
   hq: string | null;
   summary: string | null;

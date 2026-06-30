@@ -143,7 +143,8 @@ Proposed durable profile updates inferred during a session.
 Company records.
 
 - `id`: primary key.
-- `name`: company name.
+- `name`: the prominent brand or product name (e.g. `Bear`).
+- `maker`: nullable company behind the product, when different from the brand (e.g. `Shiny Frog`); `NULL` when the company and product are the same (migration `0003`).
 - `url`: nullable company URL.
 - `hq`: nullable headquarters/location note.
 - `summary`: short agent-written summary.

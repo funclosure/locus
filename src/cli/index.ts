@@ -72,7 +72,8 @@ const company = program.command("company").description("Company commands");
 
 company
   .command("add")
-  .option("--name <name>", "Company name")
+  .option("--name <name>", "Brand or product name — the prominent label (e.g. Bear)")
+  .option("--maker <maker>", "Company behind it, when different from the brand (e.g. Shiny Frog); omit when they are the same")
   .option("--url <url>", "Company URL")
   .option("--hq <hq>", "Headquarters or location note")
   .option("--summary <summary>", "Short summary")
@@ -122,7 +123,8 @@ company
 company
   .command("update")
   .requiredOption("--id <id>", "Company id")
-  .option("--name <name>", "Company name")
+  .option("--name <name>", "Brand or product name — the prominent label (e.g. Bear)")
+  .option("--maker <maker>", "Company behind it, when different from the brand (e.g. Shiny Frog); omit when they are the same")
   .option("--url <url>", "Company URL")
   .option("--hq <hq>", "Headquarters or location note")
   .option("--summary <summary>", "Short summary")
