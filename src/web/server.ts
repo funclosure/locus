@@ -63,14 +63,15 @@ export async function handleLocusWebRequest(
     }
 
     if (request.method === "POST" && url.pathname === "/api/chat") {
-      const body = JSON.parse(await readBody(request)) as { message?: unknown; companyId?: unknown };
+      const body = JSON.parse(await readBody(request)) as { message?: unknown; companyId?: unknown; selection?: unknown };
       const message = typeof body.message === "string" ? body.message.trim() : "";
       if (!message) {
         writeJson(response, 400, { error: "Empty message." });
         return;
       }
       const companyId = typeof body.companyId === "number" ? body.companyId : null;
-      const result = await runChat(message, companyId, options.dbPath);
+      const selection = typeof body.selection === "string" ? body.selection : null;
+      const result = await runChat(message, companyId, options.dbPath, selection);
       writeJson(response, 200, result);
       return;
     }

@@ -37,7 +37,7 @@ function ok(text: string) {
   return { content: [{ type: "text" as const, text }] };
 }
 
-export async function runChat(message: string, companyId: number | null, dbPath?: string): Promise<ChatResult> {
+export async function runChat(message: string, companyId: number | null, dbPath?: string, selection?: string | null): Promise<ChatResult> {
   const edits: string[] = [];
   const proposed: Array<{ id: number; label: string }> = [];
 
@@ -50,7 +50,7 @@ export async function runChat(message: string, companyId: number | null, dbPath?
     }
   };
 
-  const systemPrompt = withDb((db) => buildSystemPrompt(db, companyId));
+  const systemPrompt = withDb((db) => buildSystemPrompt(db, companyId, selection));
 
   const locus = createSdkMcpServer({
     name: "locus",
@@ -261,11 +261,13 @@ function ensureSessionId(db: Database.Database): number {
   return created.id;
 }
 
-function buildSystemPrompt(db: Database.Database, companyId: number | null): string {
+function buildSystemPrompt(db: Database.Database, companyId: number | null, selection?: string | null): string {
   const profile = getDefaultProfile(db);
   const preferences = listProfilePreferences(db, 1);
   const companies = listCompanies(db);
   const lines: string[] = [];
+
+  const highlighted = (selection || "").trim().slice(0, 2000);
 
   lines.push(
     "You help the user curate their job-search data in Locus by turning their feedback into structured edits through the provided tools.",
@@ -282,6 +284,16 @@ function buildSystemPrompt(db: Database.Database, companyId: number | null): str
 
   if (preferences.length) {
     lines.push("Known preferences: " + preferences.map((p) => `${p.kind}:${p.label}`).join("; "));
+  }
+
+  if (highlighted) {
+    lines.push(
+      "",
+      'The user has highlighted this text in the UI — treat it as the focus of their request (what they mean by "this"/"that"):',
+      '"""',
+      highlighted,
+      '"""',
+    );
   }
 
   if (companyId) {

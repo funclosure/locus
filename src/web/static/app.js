@@ -31,6 +31,7 @@ async function init() {
     render();
     initChat();
     initProfileApprovals();
+    initKeyboardNav();
   } catch (error) {
     elements.list.innerHTML = `<div class="error-state">${escapeHtml(error.message || "Unable to load Locus data.")}</div>`;
     elements.detail.innerHTML = "";
@@ -173,6 +174,23 @@ function initChat() {
   const input = document.querySelector("#chatInput");
   const close = document.querySelector("#chatClose");
   const clear = document.querySelector("#chatClear");
+  const selectionEl = document.querySelector("#chatSelection");
+  let chatSelection = "";
+
+  // capture the page's highlighted text so it rides along as context
+  function armSelection() {
+    chatSelection = (window.getSelection && window.getSelection().toString().trim()) || "";
+    renderSelection();
+  }
+  function renderSelection() {
+    if (chatSelection) {
+      selectionEl.innerHTML = `<span class="chat-selection-quote">${escapeHtml(chatSelection)}</span><button type="button" class="chat-selection-clear" aria-label="Remove selection">×</button>`;
+      selectionEl.hidden = false;
+    } else {
+      selectionEl.innerHTML = "";
+      selectionEl.hidden = true;
+    }
+  }
 
   function open() {
     const company = state.snapshot.companies.find((item) => item.id === state.selectedCompanyId);
@@ -197,14 +215,23 @@ function initChat() {
   }
 
   // the docked bar is a trigger; "/" opens the panel too — typing happens in the panel
+  // pointerdown fires before the click clears the page selection
+  trigger.addEventListener("pointerdown", armSelection);
   trigger.addEventListener("click", open);
   document.addEventListener("keydown", (event) => {
     const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
     if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
       event.preventDefault();
+      armSelection();
       open();
     } else if (event.key === "Escape" && !overlay.hidden) {
       shut();
+    }
+  });
+  selectionEl.addEventListener("click", (event) => {
+    if (event.target.closest(".chat-selection-clear")) {
+      chatSelection = "";
+      renderSelection();
     }
   });
   overlay.addEventListener("click", (event) => {
@@ -284,7 +311,7 @@ function initChat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message, companyId: state.selectedCompanyId }),
+        body: JSON.stringify({ message, companyId: state.selectedCompanyId, selection: chatSelection || null }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -300,6 +327,43 @@ function initChat() {
       pending.innerHTML = `<span class="chat-error">${escapeHtml(error.message || "Request failed.")}</span>`;
     }
   });
+}
+
+// ↑/↓ move through the company index; Enter dives into the reading pane
+function initKeyboardNav() {
+  document.addEventListener("keydown", (event) => {
+    // the chat overlay owns the keyboard while it's open
+    if (!document.querySelector("#chatOverlay").hidden) {
+      return;
+    }
+    const active = document.activeElement;
+    const tag = active?.tagName;
+    // let native dropdowns and text inputs (other than search) keep their keys
+    if (tag === "SELECT" || (tag === "INPUT" && active.id !== "search") || tag === "TEXTAREA") {
+      return;
+    }
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      moveCompany(event.key === "ArrowDown" ? 1 : -1);
+    } else if (event.key === "Enter" && tag !== "BUTTON") {
+      const detail = document.querySelector("#detailPanel");
+      const link = detail.querySelector("a.ext-link");
+      event.preventDefault();
+      (link || detail).focus();
+    }
+  });
+}
+
+function moveCompany(delta) {
+  const companies = filteredCompanies();
+  if (!companies.length) {
+    return;
+  }
+  const current = companies.findIndex((company) => company.id === state.selectedCompanyId);
+  const next = Math.min(companies.length - 1, Math.max(0, (current < 0 ? 0 : current) + delta));
+  state.selectedCompanyId = companies[next].id;
+  render();
+  elements.list.querySelector('.index-row[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
 }
 
 // approve / dismiss pending preference candidates from the profile rail

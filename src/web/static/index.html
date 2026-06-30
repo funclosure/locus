@@ -32,7 +32,7 @@
             </button>
           </div>
         </nav>
-        <article id="detailPanel" class="reading" aria-label="Company detail"></article>
+        <article id="detailPanel" class="reading" aria-label="Company detail" tabindex="-1"></article>
         <aside id="profileRail" class="profile-rail" aria-label="Profile and direction"></aside>
       </div>
       <div id="chatOverlay" class="chat-overlay" hidden>
@@ -48,6 +48,7 @@
             </div>
           </header>
           <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <div id="chatSelection" class="chat-selection" hidden></div>
           <form id="chatForm" class="chat-composer">
             <input id="chatInput" type="text" placeholder="tell me what you think…" autocomplete="off" />
             <button type="submit" class="chat-send" aria-label="Send">↵</button>

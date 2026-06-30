@@ -370,6 +370,48 @@ input::placeholder {
   content: "· ";
 }
 
+/* highlighted-text context attached to the next message */
+.chat-selection {
+  align-items: flex-start;
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  line-height: 1.45;
+  padding: 10px 12px 0;
+}
+
+.chat-selection[hidden] {
+  display: none;
+}
+
+.chat-selection-quote {
+  border-left: 2px solid var(--accent-line);
+  color: var(--text-2);
+  display: -webkit-box;
+  flex: 1;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  padding-left: 8px;
+}
+
+.chat-selection-clear {
+  background: none;
+  border: 0;
+  color: var(--text-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.chat-selection-clear:hover {
+  color: var(--text);
+}
+
 /* input lives inside the panel */
 .chat-composer {
   align-items: center;
