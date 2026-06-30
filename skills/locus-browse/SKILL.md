@@ -9,20 +9,23 @@ Launch the local browse UI so the user can review agent-collected research faste
 
 ## Launch
 
-The UI serves the built static files and reads the same database as the CLI:
+Do the least work needed — the server is often already running, and it reads the static files fresh on every request, so a running server already serves the latest UI.
 
-```bash
-pnpm build
-pnpm web
-```
+1. **If something is already serving the port, just open it:**
 
-This serves the research cockpit at `http://127.0.0.1:4173`. Open it:
+   ```bash
+   curl -sf http://127.0.0.1:4173/ >/dev/null && open http://127.0.0.1:4173
+   ```
 
-```bash
-open http://127.0.0.1:4173
-```
+2. **Otherwise build only if needed, then start and open:**
 
-The server keeps running in the foreground; stop it with Ctrl-C (or kill the background process) when done.
+   ```bash
+   [ -f dist/web/server.js ] || pnpm build
+   pnpm web   # serves http://127.0.0.1:4173 (run in background)
+   open http://127.0.0.1:4173
+   ```
+
+Rebuild (`pnpm build`) only after changing TypeScript (server or CLI). Static HTML/CSS/JS edits need no rebuild — just reload the page. Do not start a second `pnpm web` while one is running; it will fail with `EADDRINUSE`. Stop the server with Ctrl-C or by killing the `dist/web/server.js` process.
 
 ## What's On The Page
 
