@@ -32,7 +32,16 @@ skills/
 
 ## Project State
 
-Currently at Phase 2. The CLI can create/read profile, sessions, companies, roles, notes, evidence, preference candidates, and exports. The browse UI is not built yet.
+Phases 0–2 are complete and Phase 3 (browse UI) is at MVP.
+
+- **Data layer + CLI (Phase 1):** SQLite with migrations (`src/db/migrations/`), TypeScript domain types/validators/enums, and repositories for profile, session, company, role, note, evidence, preference candidate, export, and application. The `locus` CLI covers profile, session, company, role, note, evidence, preference (propose/approve/reject), application (set/list/show), and export (json/markdown), all with `--json`.
+- **Skill layer (Phase 2):** All five skills exist under `skills/` (see below).
+- **Browse UI (Phase 3, MVP):** `pnpm web` serves a static research cockpit (`src/web/static/`) backed by `GET /api/snapshot` (full JSON export) and `POST /api/applications`.
+- **Applications pipeline (beyond original plan):** the `applications` table (migration `0002`) tracks per-target pipeline `stage` and next actions, with one row per target (upsert by `target_type`/`target_id`). It has a repository, a `POST /api/applications` web endpoint, and a `locus application` CLI command (`set`/`list`/`show`) — see `docs/PLAN.md` for the data-model note.
+
+Not yet started: Phase 4 (MCP / local API) and Phase 5 (research automation).
+
+Verify status with `pnpm run check` and `pnpm test` (all green as of last review).
 
 ## Key Conventions
 

@@ -221,6 +221,22 @@ Polymorphic tag assignments.
 - `target_type`: `target_type`.
 - `target_id`: target primary key.
 
+#### `applications`
+
+Pipeline tracking for a company or role the user is actively pursuing. Added after the original data-model sketch (migration `0002`). Exposed via the `locus application` CLI command (`set`/`list`/`show`) and the `POST /api/applications` web endpoint.
+
+- `id`: primary key.
+- `target_type`: `company` or `role`.
+- `target_id`: target primary key.
+- `stage`: `application_stage`.
+- `next_action`: nullable description of the next step.
+- `next_action_at`: nullable timestamp for the next step.
+- `last_contacted_at`: nullable timestamp of last contact.
+- `notes`: nullable freeform notes.
+- `created_at`: creation timestamp.
+- `updated_at`: update timestamp.
+- Unique on (`target_type`, `target_id`); one application row per target.
+
 #### `exports`
 
 Generated artifacts.
@@ -244,6 +260,7 @@ Generated artifacts.
 - `source_type`: `company_site`, `job_post`, `article`, `social`, `docs`, `manual`, `other`.
 - `remote_policy`: `remote`, `hybrid`, `onsite`, `unknown`.
 - `target_type`: `profile`, `session`, `company`, `role`, `preference`, `preference_candidate`.
+- `application_stage`: `researching`, `warm_intro`, `reached_out`, `applied`, `interviewing`, `offer`, `rejected`, `paused`.
 
 ### Locked Decisions
 
@@ -255,7 +272,7 @@ Generated artifacts.
 - Use polymorphic `target_type` and `target_id` for `notes`, `evidence`, and `taggings` in v1.
 - Constrain `target_type` to the enum values in schema/domain validation.
 
-## Phase 0: Foundation
+## Phase 0: Foundation — ✅ complete
 
 Goal: make the repo understandable before writing product code.
 
@@ -272,7 +289,7 @@ Exit criteria:
 - The product boundary is clear: data layer, agent interface, skill layer, browse UI.
 - The first implementation slice is obvious.
 
-## Phase 1: Data Layer And CLI
+## Phase 1: Data Layer And CLI — ✅ complete
 
 Goal: let agents write useful structured data before the UI exists.
 
@@ -338,7 +355,7 @@ Exit criteria:
 - Codex or Claude can use shell commands to populate and inspect Locus.
 - The user can export a useful markdown shortlist without a UI.
 
-## Phase 2: Skill Layer
+## Phase 2: Skill Layer — ✅ complete
 
 Goal: teach agents how to use Locus consistently.
 
@@ -367,7 +384,9 @@ Exit criteria:
 - The same instruction content can be adapted for Claude project context.
 - Current status: `convo`, `locus-research`, `locus-curation`, `locus-preference-learning`, and `locus-export` exist under `skills/`.
 
-## Phase 3: Browse UI
+## Phase 3: Browse UI — 🟡 MVP
+
+> Current status: a static research cockpit (`src/web/static/`) is served by `pnpm web` over `GET /api/snapshot` (full JSON export) and `POST /api/applications`. Remaining exit-criteria work: in-UI editing of notes/statuses and approve/reject of preference candidates.
 
 Goal: give the user a clean way to inspect and edit what agents wrote.
 
