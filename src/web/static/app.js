@@ -65,12 +65,30 @@ function render() {
   elements.summary.innerHTML = renderSummary(companies);
   elements.list.innerHTML = companies.length ? companies.map((company) => renderIndexRow(company)).join("") : `<div class="empty-state">No matches.</div>`;
   elements.detail.innerHTML = selected ? renderDetail(selected) : `<div class="reading-inner"><p class="lede">Select a company to inspect notes and evidence.</p></div>`;
+  wireLede();
 
   elements.list.querySelectorAll(".index-row").forEach((row) => {
     row.addEventListener("click", () => {
       state.selectedCompanyId = Number(row.dataset.companyId);
       render();
     });
+  });
+}
+
+// reveal the "Read more" toggle only when the clamped assessment actually overflows
+function wireLede() {
+  const lede = elements.detail.querySelector("[data-lede]");
+  const toggle = elements.detail.querySelector("[data-lede-toggle]");
+  if (!lede || !toggle) return;
+  if (lede.scrollHeight - lede.clientHeight > 4) {
+    toggle.hidden = false;
+  }
+  toggle.addEventListener("click", () => {
+    const clamped = lede.classList.toggle("clamped");
+    toggle.textContent = clamped ? "Read more" : "Read less";
+    if (clamped) {
+      lede.scrollIntoView({ block: "nearest" });
+    }
   });
 }
 
@@ -122,7 +140,10 @@ function renderDetail(company) {
         ${company.maker ? `<p class="reading-maker">by ${escapeHtml(company.maker)}</p>` : ""}
         <p class="reading-meta">${[humanize(company.status), count(counts.roles, "role"), count(counts.notes, "note"), count(counts.evidence, "source")].join(" · ")}</p>
         ${renderHeaderLinks(company, evidence)}
-        <p class="lede">${escapeHtml(company.fitAssessment || company.summary || "No assessment yet.")}</p>
+        <div class="lede-wrap">
+          <p class="lede clamped" data-lede>${escapeHtml(company.fitAssessment || company.summary || "No assessment yet.")}</p>
+          <button type="button" class="lede-toggle" data-lede-toggle hidden>Read more</button>
+        </div>
       </header>
       ${renderSection("Application", renderApplication(application))}
       ${renderSection("Roles", listHtml(roles.map(roleItem)))}
