@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from "node:fs";
+import { createReadStream, existsSync, readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { extname, normalize, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -14,6 +14,8 @@ import { runChat } from "./chat.js";
 export type LocusWebServerOptions = {
   dbPath?: string;
   staticRoot?: string;
+  /** Private, gitignored markdown rendered in the profile rail; absent file disables the section. */
+  compensationPath?: string;
 };
 
 export type StartLocusWebServerOptions = LocusWebServerOptions & {
@@ -22,6 +24,7 @@ export type StartLocusWebServerOptions = LocusWebServerOptions & {
 };
 
 const defaultStaticRoot = resolve(process.cwd(), "src", "web", "static");
+const defaultCompensationPath = resolve(process.cwd(), ".locus", "compensation.md");
 
 export function createLocusWebServer(options: LocusWebServerOptions = {}): Server {
   ensureDatabase(options.dbPath);
@@ -53,6 +56,16 @@ export async function handleLocusWebRequest(
     const url = new URL(request.url ?? "/", "http://localhost");
     if (request.method === "GET" && url.pathname === "/api/snapshot") {
       writeJson(response, 200, buildSnapshot(options.dbPath));
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/compensation") {
+      const compensationPath = options.compensationPath ?? defaultCompensationPath;
+      if (!existsSync(compensationPath)) {
+        writeJson(response, 404, { error: "No compensation file." });
+        return;
+      }
+      writeJson(response, 200, { markdown: readFileSync(compensationPath, "utf8") });
       return;
     }
 

@@ -1,5 +1,7 @@
 const state = {
   snapshot: null,
+  compensation: null,
+  compensationOpen: false,
   selectedCompanyId: null,
   search: "",
   status: "all",
@@ -25,6 +27,7 @@ async function init() {
       throw new Error(`Snapshot request failed with ${response.status}`);
     }
     state.snapshot = await response.json();
+    state.compensation = await fetchCompensation();
     state.selectedCompanyId = state.snapshot.companies[0]?.id ?? null;
     bindFilters();
     elements.profile.innerHTML = renderProfile();
@@ -35,6 +38,20 @@ async function init() {
   } catch (error) {
     elements.list.innerHTML = `<div class="error-state">${escapeHtml(error.message || "Unable to load Locus data.")}</div>`;
     elements.detail.innerHTML = "";
+  }
+}
+
+// private local file (.locus/compensation.md); a 404 just hides the section
+async function fetchCompensation() {
+  try {
+    const response = await fetch("/api/compensation");
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json();
+    return typeof data.markdown === "string" && data.markdown.trim() ? data.markdown : null;
+  } catch {
+    return null;
   }
 }
 
@@ -389,6 +406,17 @@ function moveCompany(delta) {
 
 // approve / dismiss pending preference candidates from the profile rail
 function initProfileApprovals() {
+  // toggle doesn't bubble, so listen in the capture phase; remembering the state
+  // here keeps the fold from snapping shut when a chat edit re-renders the rail
+  elements.profile.addEventListener(
+    "toggle",
+    (event) => {
+      if (event.target.classList?.contains("comp-group")) {
+        state.compensationOpen = event.target.open;
+      }
+    },
+    true,
+  );
   elements.profile.addEventListener("click", async (event) => {
     const button = event.target.closest(".pref-btn");
     if (!button) {
@@ -526,10 +554,85 @@ function renderProfile() {
         <h2 class="rail-name">${escapeHtml(profile.name)}</h2>
         <p class="rail-summary">${escapeHtml(profile.summary || "")}</p>
       </div>
+      ${renderCompensation()}
       ${pendingHtml}
       ${groupsHtml}
     </div>
   `;
+}
+
+// collapsed by default: comp data stays hidden while screen-sharing the cockpit
+function renderCompensation() {
+  if (!state.compensation) {
+    return "";
+  }
+  return `
+    <details class="rail-group comp-group"${state.compensationOpen ? " open" : ""}>
+      <summary class="rail-label comp-summary">Compensation <span class="comp-badge">private</span></summary>
+      <div class="comp-body">${renderMarkdown(state.compensation)}</div>
+    </details>
+  `;
+}
+
+// just enough markdown for the comp file: headings, tables, lists, bold/italic/code
+function renderMarkdown(markdown) {
+  const html = [];
+  let table = null;
+  let list = null;
+
+  const flushTable = () => {
+    if (!table) return;
+    const [head, ...rows] = table;
+    html.push(
+      `<table><thead><tr>${head.map((cell) => `<th>${cell}</th>`).join("")}</tr></thead>` +
+        `<tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table>`,
+    );
+    table = null;
+  };
+  const flushList = () => {
+    if (!list) return;
+    html.push(`<ul>${list.map((item) => `<li>${item}</li>`).join("")}</ul>`);
+    list = null;
+  };
+
+  for (const raw of String(markdown).split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line.startsWith("|")) {
+      flushList();
+      const cells = line.replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => mdInline(cell.trim()));
+      if (!cells.every((cell) => /^:?-{3,}:?$/.test(cell))) {
+        (table = table || []).push(cells);
+      }
+      continue;
+    }
+    flushTable();
+    const heading = line.match(/^(#{1,4})\s+(.*)$/);
+    if (heading) {
+      flushList();
+      html.push(`<div class="md-h md-h${heading[1].length}">${mdInline(heading[2])}</div>`);
+      continue;
+    }
+    if (/^- /.test(line)) {
+      (list = list || []).push(mdInline(line.slice(2)));
+      continue;
+    }
+    flushList();
+    if (line) {
+      html.push(`<p>${mdInline(line)}</p>`);
+    }
+  }
+  flushTable();
+  flushList();
+  return html.join("");
+}
+
+function mdInline(text) {
+  return escapeHtml(text)
+    .replace(/^\[ \]\s*/, "☐ ")
+    .replace(/^\[x\]\s*/i, "☑ ")
+    .replaceAll(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replaceAll(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>")
+    .replaceAll(/`([^`]+)`/g, "<code>$1</code>");
 }
 
 function renderSection(label, bodyHtml) {

@@ -885,6 +885,118 @@ input::placeholder {
   margin-top: 2px;
 }
 
+/* ── compensation: private local markdown, collapsed by default ── */
+.comp-summary {
+  align-items: baseline;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 0 -8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s ease, color 0.15s ease;
+  user-select: none;
+}
+
+.comp-summary:hover {
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+.comp-summary::-webkit-details-marker {
+  display: none;
+}
+
+.comp-summary::before {
+  color: var(--accent);
+  content: "▸";
+  font-size: 9px;
+  transition: transform 0.15s ease;
+}
+
+.comp-group[open] .comp-summary::before {
+  transform: rotate(90deg);
+}
+
+.comp-group[open] .comp-summary {
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.comp-badge {
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  color: var(--text-ghost);
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+}
+
+.comp-body .md-h {
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+
+.comp-body .md-h1 {
+  display: none; /* the section header already says Compensation */
+}
+
+.comp-body p,
+.comp-body ul {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 6px 0;
+}
+
+.comp-body ul {
+  padding-left: 16px;
+}
+
+.comp-body li {
+  margin-bottom: 3px;
+}
+
+.comp-body table {
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.comp-body th {
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.comp-body th,
+.comp-body td {
+  border-bottom: 1px solid var(--border);
+  padding: 5px 10px 5px 0;
+}
+
+.comp-body td {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.comp-body td strong {
+  color: var(--accent-bright);
+}
+
+.comp-body code {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
 /* medium: drop the rail to a full-width band below — revert to natural page scroll */
 @media (max-width: 1080px) {
   .app-shell {

@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -68,6 +68,31 @@ describe("locus web server", () => {
     expect(snapshot.applications.find((application: { targetType: string }) => application.targetType === "company").stage).toBe(
       "reached_out",
     );
+  });
+
+  it("serves the private compensation markdown when the file exists", async () => {
+    const dbPath = seedDatabase();
+    const compensationPath = join(tempDir!, "compensation.md");
+    writeFileSync(compensationPath, "# Compensation Reference\n\n| Anchor | HKD |\n|---|---|\n| Floor | 66,000 |\n");
+
+    const response = await requestPath(dbPath, "/api/compensation", { compensationPath });
+    const parsed = JSON.parse(response.body);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("application/json");
+    expect(parsed.markdown).toContain("Compensation Reference");
+    expect(parsed.markdown).toContain("66,000");
+  });
+
+  it("returns 404 for compensation when no file exists", async () => {
+    const dbPath = seedDatabase();
+
+    const response = await requestPath(dbPath, "/api/compensation", {
+      compensationPath: join(tempDir!, "missing.md"),
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(JSON.parse(response.body).error).toContain("No compensation file");
   });
 
   it("serves the browse UI shell", async () => {
@@ -154,7 +179,7 @@ function seedDatabase() {
 async function requestPath(
   dbPath: string,
   path: string,
-  options: { method?: string; body?: unknown } = {},
+  options: { method?: string; body?: unknown; compensationPath?: string } = {},
 ): Promise<FakeResponse> {
   const response = new FakeResponse();
   const request = new FakeRequest(options.body ? JSON.stringify(options.body) : "");
@@ -163,6 +188,7 @@ async function requestPath(
   await handleLocusWebRequest(request as unknown as IncomingMessage, response as unknown as ServerResponse, {
     dbPath,
     staticRoot: join(process.cwd(), "src", "web", "static"),
+    compensationPath: options.compensationPath,
   });
   await response.done();
   return response;
