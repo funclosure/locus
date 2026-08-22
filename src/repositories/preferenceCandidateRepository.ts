@@ -29,6 +29,15 @@ export function proposePreferenceCandidate(db: Database.Database, input: Prefere
 }
 
 export function approvePreferenceCandidate(db: Database.Database, id: number): PreferenceCandidate {
+  const existing = getPreferenceCandidate(db, id);
+  if (!existing) throw new Error(`Preference candidate ${id} not found.`);
+  // Approving is what makes a candidate durable; without this insert the profile never changes.
+  if (existing.status !== "approved") {
+    db.prepare(
+      `insert into profile_preferences (profile_id, kind, label, description, weight, source)
+       values (?, ?, ?, ?, ?, 'approved_candidate')`,
+    ).run(existing.profileId, existing.kind, existing.label, existing.description, existing.confidence);
+  }
   return setPreferenceCandidateStatus(db, id, "approved");
 }
 

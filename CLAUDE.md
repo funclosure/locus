@@ -32,6 +32,7 @@ skills/
   locus-status/SKILL.md                — review pipeline, fits, evidence health, and next actions
   locus-pipeline/SKILL.md              — set and advance application stages and next actions
   locus-browse/SKILL.md                — launch and walk through the read-only browse UI
+  locus-scan/SKILL.md                  — discovery rounds for companies not yet in Locus
 ```
 
 Each skill is symlinked into `.claude/skills/` so it is invocable as a slash command from Claude Code.

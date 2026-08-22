@@ -13,6 +13,7 @@ import {
   proposePreferenceCandidate,
   rejectPreferenceCandidate,
 } from "../../src/repositories/preferenceCandidateRepository.js";
+import { listProfilePreferences } from "../../src/repositories/profileRepository.js";
 import { createSession } from "../../src/repositories/sessionRepository.js";
 
 let tempDir: string | null = null;
@@ -150,5 +151,56 @@ describe("note, evidence, and preference repositories", () => {
     expect(pending.status).toBe("pending");
     expect(approved.status).toBe("approved");
     expect(rejected.status).toBe("rejected");
+  });
+
+  it("materializes an approved candidate into the durable profile", () => {
+    const db = setupDb();
+    const session = createSession(db, {
+      profileId: 1,
+      title: null,
+      goal: "Research education technology",
+    });
+    const before = listProfilePreferences(db, 1).length;
+    const candidate = proposePreferenceCandidate(db, {
+      sessionId: session.id,
+      profileId: 1,
+      kind: "interest",
+      label: "Education technology and learning tools",
+      description: "User asked to expand the search into edu-tech.",
+      confidence: 0.9,
+    });
+    approvePreferenceCandidate(db, candidate.id);
+    const after = listProfilePreferences(db, 1);
+    const added = after.find((preference) => preference.label === "Education technology and learning tools");
+
+    // Approving twice must not duplicate the durable preference.
+    approvePreferenceCandidate(db, candidate.id);
+    const afterSecondApproval = listProfilePreferences(db, 1);
+    db.close();
+
+    expect(after).toHaveLength(before + 1);
+    expect(added?.kind).toBe("interest");
+    expect(added?.source).toBe("approved_candidate");
+    expect(added?.weight).toBe(0.9);
+    expect(afterSecondApproval).toHaveLength(before + 1);
+  });
+
+  it("does not add a durable preference when a candidate is rejected", () => {
+    const db = setupDb();
+    const session = createSession(db, { profileId: 1, title: null, goal: "Research" });
+    const before = listProfilePreferences(db, 1).length;
+    const candidate = proposePreferenceCandidate(db, {
+      sessionId: session.id,
+      profileId: 1,
+      kind: "negative_signal",
+      label: "Never applied",
+      description: "Should not reach the profile.",
+      confidence: 0.5,
+    });
+    rejectPreferenceCandidate(db, candidate.id);
+    const after = listProfilePreferences(db, 1);
+    db.close();
+
+    expect(after).toHaveLength(before);
   });
 });
