@@ -71,6 +71,21 @@ location and timezone policy, not just whether the company is remote.
 Watch for the softer version too — a company that hires anywhere but runs a core
 synchronous window in US Pacific hours is region-locked in practice.
 
+**Location-independent pay is a sharper screen than "hires globally".** A company can
+hire anywhere and still pay a local-market rate, which quietly caps the offer. The
+companies worth finding state that pay does not vary by location — usually phrased as
+same pay regardless of where you live, or benchmarked to a named market. That single
+policy is worth more than most other signals combined for a candidate outside the US, and
+it correlates strongly with the async, low-meeting, high-autonomy cultures this profile
+wants. Search the phrase directly; it is rare enough that the set is small and nameable.
+
+The screen earns its keep in both directions. Doist advertises that it "never places
+restrictions on locations" yet benchmarks salary to industry data "adjusted for your
+location" — hires anywhere, pays local, and the qualifier lives several paragraphs below
+the headline. Raycast states the opposite outright: "We pay you a location independent
+rate." Same remote-friendly surface, materially different offer. Read the compensation
+section, not the remote-work section.
+
 **Query the applicant-tracking API directly — it is ground truth and costs one call.**
 Most careers pages render client-side and defeat fetching, and aggregators lie in both
 directions. Both major ATS platforms expose public JSON:
@@ -86,6 +101,13 @@ geography question in a single request. This settled three candidates in one rou
 page-fetching could not, and disproved live iOS listings that four separate aggregators
 were still syndicating.
 
+**But the ATS sweep is blind to exactly the companies this profile most wants.** In round
+6, not one of eleven screened indie Apple studios had a Greenhouse or Ashby board — every
+single one was a hand-rolled careers page or nothing at all. Applicant tracking systems
+are a venture-scale artifact; a four-person studio has no use for one. So a clean ATS
+sweep buys much less confidence than it appears to, and its silence is not evidence of
+anything. Use the ATS query for funded companies, and expect to read HTML for the rest.
+
 **Confirm hiring on the company's own jobs page, never on an aggregator.** Job boards,
 `about` pages, and third-party listings go stale in both directions: they advertise roles
 that closed and reframe hybrid roles as remote. In the first live round, all three
@@ -94,6 +116,19 @@ before spending a deep dive.
 
 A company with no opening but an explicit invitation to write in has not failed this
 filter — it has become an outreach target. Record it as `watching` and note the angle.
+
+For tiny Apple studios this is not the edge case, it is **the normal outcome**. Round 6
+screened eleven and found zero live openings but two standing invitations, and iA Writer,
+Kagi, Ulysses and MindNode all sit in this state. Treat "no openings, but write to us" as
+a successful screen result rather than a dead end, and stop expecting these companies to
+post — they hire from a letter, an artifact, or someone they already read.
+
+**Resolve employability before deep-diving an invitation.** A five-person GmbH in Leipzig
+or Vienna may have no mechanism to employ someone outside the EU at all, and that gate
+sits upstream of everything a deep dive measures — culture, compensation, and scores are
+all moot if the company cannot legally pay this candidate. It is rarely answerable from
+the public site, which means the honest move is to record the gap and ask them, not to
+spend a deep dive and discover it afterwards.
 
 Two traps when checking a careers page: it may return a **filtered view** showing one
 department, so confirm the list is unfiltered before concluding a role does not exist;
