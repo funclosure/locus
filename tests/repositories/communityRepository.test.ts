@@ -52,11 +52,16 @@ describe("communityRepository", () => {
     const created = withDb((db) => addCommunity(db, raycast));
     expect(created.id).toBeGreaterThan(0);
     expect(created.name).toBe("raycast/extensions");
+    expect(created.url).toBe("https://github.com/raycast/extensions");
     expect(created.ecosystem).toBe("TypeScript");
+    expect(created.summary).toBe("Extension store, reviewed by Raycast staff.");
+    expect(created.primaryLabel).toBe("high-openness");
+    expect(created.status).toBe("watching");
     expect(created.medianMergeDays).toBe(0.1);
     expect(created.outsiderMergeRatio).toBe(0.66);
     expect(created.lastActivityAt).toBe("2026-08-27");
-    expect(created.status).toBe("watching");
+    expect(created.fitScore).toBe(0.9);
+    expect(created.fitAssessment).toBe("Fastest merge latency measured; ties to Raycast as a target.");
     expect(created.lastCheckedAt).toBeNull();
 
     const fetched = withDb((db) => getCommunity(db, created.id));
