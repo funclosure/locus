@@ -20,6 +20,7 @@ For focused reads:
 ```bash
 pnpm locus application list --json
 pnpm locus company list --json
+pnpm locus community list --json
 pnpm locus preference list --status pending --json
 ```
 
@@ -31,9 +32,10 @@ Report these sections, concisely:
 
 1. **Pipeline** — group applications by `stage` (researching → warm_intro → reached_out → applied → interviewing → offer; plus rejected/paused). Note anything with a `next_action` due or overdue against today.
 2. **Top fits** — companies/roles by `fit_score`, highest first. Call out strong fits not yet shortlisted or acted on.
-3. **Evidence health** — flag companies with factual claims but no evidence, and evidence whose `checked_at` is old. Evidence dates are the trust signal.
-4. **Pending preferences** — list `pending` preference candidates awaiting the user's approval. These are proposals, not approved profile memory.
-5. **Gaps** — companies missing a summary, label, status, or fit assessment.
+3. **Communities** — open-source communities by `fit_score`, alongside companies. Flag any with stale `last_checked_at`.
+4. **Evidence health** — flag companies and communities with factual claims but no evidence, and evidence whose `checked_at` is old. Evidence dates are the trust signal.
+5. **Pending preferences** — list `pending` preference candidates awaiting the user's approval. These are proposals, not approved profile memory.
+6. **Gaps** — companies and communities missing a summary, label, status, or fit assessment.
 
 ## Suggest Next Actions
 

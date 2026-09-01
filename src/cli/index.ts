@@ -17,8 +17,8 @@ import {
 import { buildJsonExport } from "../export/json.js";
 import { buildMarkdownExport } from "../export/markdown.js";
 import { getApplication, listApplications, upsertApplication } from "../repositories/applicationRepository.js";
-import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addCommunity, getCommunity, listCommunities, updateCommunity } from "../repositories/communityRepository.js";
+import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
 import { recordExport } from "../repositories/exportRepository.js";
 import { addNote, listNotes } from "../repositories/noteRepository.js";

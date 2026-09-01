@@ -99,10 +99,10 @@ export type Community = {
   status: CommunityStatus;
   medianMergeDays: number | null;
   outsiderMergeRatio: number | null;
-  lastActivityAt: string | null;
+  lastActivityAt: Timestamp | null;
   fitScore: NullableScore;
   fitAssessment: string | null;
-  lastCheckedAt: string | null;
+  lastCheckedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

@@ -13,7 +13,9 @@ rules, `--json` conventions. Do not restate it here; follow it for every write.
 
 ## Round Shape
 
-1. **Dedup.** `pnpm locus company list --json`. Skip anything already present.
+1. **Dedup.** `pnpm locus company list --json`. Skip anything already present. If the
+   round is looking at open-source communities, also run
+   `pnpm locus community list --json`.
 2. **Shallow screen 10-15 candidates, 1-2 searches each.** The budget is the point:
    without it this phase expands to fill the round.
 3. **Deep dive the best 3.** Culture check, comp comparison, evidence, dual scores.

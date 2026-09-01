@@ -9,6 +9,7 @@ let tempDir: string | null = null;
 function seedResearch(dbPath: string): void {
   runCli(["session", "start", "--goal", "Research Apple-native notes companies", "--json"], dbPath);
   runCli(["company", "add", "--name", "Bear", "--summary", "Apple-native markdown notes.", "--primary-label", "craft-driven", "--json"], dbPath);
+  runCli(["community", "add", "--name", "raycast/extensions", "--summary", "Raycast extension ecosystem.", "--json"], dbPath);
   runCli(["role", "add", "--company-id", "1", "--title", "Senior iOS Engineer", "--remote-policy", "remote", "--json"], dbPath);
   runCli(["note", "add", "--target", "company:1", "--body", "Small remote team signal.", "--json"], dbPath);
   runCli([
@@ -43,6 +44,7 @@ describe("export CLI", () => {
 
     expect(exported.profile.name).toBeTruthy();
     expect(exported.companies[0].name).toBe("Bear");
+    expect(exported.communities[0].name).toBe("raycast/extensions");
     expect(exported.roles[0].title).toBe("Senior iOS Engineer");
     expect(exported.notes[0].body).toContain("remote");
     expect(exported.evidence[0].url).toBe("https://bear.app");

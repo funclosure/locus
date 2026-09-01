@@ -21,6 +21,7 @@ Prefer structured writes over prose summaries:
 
 ```bash
 pnpm locus company add --name "Bear" --summary "Apple-native markdown notes." --primary-label "craft-driven" --json
+pnpm locus community add --name "raycast/extensions" --ecosystem "TypeScript" --summary "Raycast extension ecosystem." --json
 pnpm locus role add --company-id 1 --title "Senior iOS Engineer" --remote-policy remote --json
 pnpm locus note add --target company:1 --body "Small Apple-platform team; worth tracking." --json
 pnpm locus evidence add --target company:1 --url "https://bear.app" --snippet "Markdown notes app for Apple devices." --source-type company_site --json
