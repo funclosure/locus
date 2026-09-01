@@ -4,9 +4,10 @@ import { z } from "zod";
 import { openDatabase } from "../db/client.js";
 import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
-import { candidateStatuses, companyStatuses, roleStatuses, targetTypes } from "../domain/enums.js";
+import { candidateStatuses, communityStatuses, companyStatuses, roleStatuses, targetTypes } from "../domain/enums.js";
 import {
   applicationInputSchema,
+  communityInputSchema,
   companyInputSchema,
   evidenceInputSchema,
   noteInputSchema,
@@ -17,6 +18,7 @@ import {
 import { buildJsonExport } from "../export/json.js";
 import { buildMarkdownExport } from "../export/markdown.js";
 import { getApplication, listApplications, upsertApplication } from "../repositories/applicationRepository.js";
+import { addCommunity, getCommunity, listCommunities, updateCommunity } from "../repositories/communityRepository.js";
 import { addCompany, getCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
 import { addNote, listNotes } from "../repositories/noteRepository.js";
@@ -101,6 +103,27 @@ export function registerLocusTools(server: McpServer, dbPath?: string): void {
   server.registerTool("company_update", { description: "Update fields on a company.", inputSchema: { id: idField, ...companyInputSchema.partial().shape } }, async (args) => {
     const { id, ...rest } = args;
     return withDb((db) => json({ company: updateCompany(db, id, companyInputSchema.partial().parse(rest)) }));
+  });
+
+  // ── communities ──────────────────────────────────────────
+  server.registerTool("community_add", { description: "Add an open-source community.", inputSchema: communityInputSchema.shape }, async (args) =>
+    withDb((db) => json({ community: addCommunity(db, communityInputSchema.parse(args)) })),
+  );
+  server.registerTool("community_list", { description: "List open-source communities, optionally filtered by status.", inputSchema: { status: z.enum(communityStatuses).optional() } }, async (args) =>
+    withDb((db) => json({ communities: listCommunities(db, args.status ? { status: args.status } : {}) })),
+  );
+  server.registerTool("community_get", { description: "Get a single community by id.", inputSchema: { id: idField } }, async (args) =>
+    withDb((db) => {
+      const community = getCommunity(db, args.id);
+      if (!community) {
+        throw new Error(`Community ${args.id} not found.`);
+      }
+      return json({ community });
+    }),
+  );
+  server.registerTool("community_update", { description: "Update fields on a community.", inputSchema: { id: idField, ...communityInputSchema.partial().shape } }, async (args) => {
+    const { id, ...rest } = args;
+    return withDb((db) => json({ community: updateCommunity(db, id, communityInputSchema.partial().parse(rest)) }));
   });
 
   // ── roles ────────────────────────────────────────────────

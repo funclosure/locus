@@ -46,7 +46,7 @@ Phases 0–2 are complete and Phase 3 (browse UI) is at MVP.
 - **Browse UI (Phase 3, MVP):** `pnpm web` serves a read-only research cockpit (`src/web/static/`) — index / reading pane / profile rail — backed by `GET /api/snapshot`. A `/`-activated command bar runs `POST /api/chat`: feedback is sent to a Claude agent (`@anthropic-ai/claude-agent-sdk`, authenticated via Claude Code login — no API key) with curated in-process Locus tools. Company/role/note/application edits apply directly; profile changes route through `propose_preference` for approval. See `src/web/chat.ts`. The profile rail also renders `.locus/compensation.md` (private, gitignored, user-maintained) via `GET /api/compensation` as a collapsed-by-default Compensation section; the section disappears if the file is absent.
 - **Applications pipeline (beyond original plan):** the `applications` table (migration `0002`) tracks per-target pipeline `stage` and next actions, with one row per target (upsert by `target_type`/`target_id`). It has a repository, a `POST /api/applications` web endpoint, and a `locus application` CLI command (`set`/`list`/`show`) — see `docs/PLAN.md` for the data-model note.
 
-- **MCP server (Phase 4):** `src/mcp/` exposes all CLI operations as 24 MCP tools over stdio (`pnpm mcp`, bin `locus-mcp`), wrapping the same repositories with the same validators. See `docs/mcp.md` for the tool surface and agent registration.
+- **MCP server (Phase 4):** `src/mcp/` exposes all CLI operations as 28 MCP tools over stdio (`pnpm mcp`, bin `locus-mcp`), wrapping the same repositories with the same validators. See `docs/mcp.md` for the tool surface and agent registration.
 
 Not yet started: Phase 5 (research automation).
 

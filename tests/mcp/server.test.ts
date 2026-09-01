@@ -39,6 +39,10 @@ const EXPECTED_TOOLS = [
   "company_list",
   "company_update",
   "company_get",
+  "community_add",
+  "community_list",
+  "community_get",
+  "community_update",
   "role_add",
   "role_list",
   "role_update",
@@ -96,5 +100,26 @@ describe("Locus MCP server", () => {
     const client = await connect();
     const result = await client.callTool({ name: "export_markdown", arguments: {} });
     expect(result.content[0].text).toContain("#");
+  });
+
+  it("registers the community tools and round-trips a record", async () => {
+    const client = await connect();
+    const names = (await client.listTools()).tools.map((tool) => tool.name);
+    expect(names).toContain("community_add");
+    expect(names).toContain("community_list");
+    expect(names).toContain("community_get");
+    expect(names).toContain("community_update");
+
+    const created = payload(
+      await client.callTool({
+        name: "community_add",
+        arguments: { name: "raycast/extensions", ecosystem: "TypeScript", status: "watching", medianMergeDays: 0.1 },
+      }),
+    ).community;
+    expect(created.name).toBe("raycast/extensions");
+    expect(created.medianMergeDays).toBe(0.1);
+
+    const updated = payload(await client.callTool({ name: "community_update", arguments: { id: created.id, status: "contributing" } }));
+    expect(updated.community.status).toBe("contributing");
   });
 });

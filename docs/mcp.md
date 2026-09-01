@@ -18,13 +18,14 @@ The server reads/writes the same SQLite database as the CLI and web UI. The data
 
 ## Tool surface
 
-Twenty-four tools, mirroring the CLI one-to-one:
+Twenty-eight tools, mirroring the CLI one-to-one:
 
 | Group | Tools |
 | --- | --- |
 | profile | `profile_show` |
 | sessions | `session_start`, `session_show` |
 | companies | `company_add`, `company_list`, `company_get`, `company_update` |
+| communities | `community_add`, `community_list`, `community_get`, `community_update` |
 | roles | `role_add`, `role_list`, `role_update` |
 | notes | `note_add`, `note_list` |
 | evidence | `evidence_add`, `evidence_list` |

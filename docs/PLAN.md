@@ -437,7 +437,7 @@ Goal: make Locus easier for agent surfaces to call directly.
 
 Deliverables:
 
-- MCP server or local HTTP API exposing the same operations as the CLI. — done: stdio MCP server in `src/mcp/` (`pnpm mcp`, bin `locus-mcp`), 24 tools mirroring the CLI.
+- MCP server or local HTTP API exposing the same operations as the CLI. — done: stdio MCP server in `src/mcp/` (`pnpm mcp`, bin `locus-mcp`), 28 tools mirroring the CLI.
 - Tool schemas for core operations. — done: input schemas reuse the domain validators.
 - Agent integration docs. — done: `docs/mcp.md`.
 - Compatibility notes for Codex and Claude. — done: registration snippets for Claude Code, Claude Desktop, and Codex in `docs/mcp.md`.
