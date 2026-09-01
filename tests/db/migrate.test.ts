@@ -61,24 +61,24 @@ describe("migrateDatabase", () => {
     ).run();
 
     const noteRows = [
-      { session_id: 1, target_type: "company", target_id: 7, title: "t1", body: "b1", kind: "observation" },
-      { session_id: 1, target_type: "role", target_id: 2, title: null, body: "b2", kind: "decision" },
-      { session_id: null, target_type: null, target_id: null, title: "t3", body: "b3", kind: "summary" },
-      { session_id: 1, target_type: "preference_candidate", target_id: 4, title: "t4", body: "b4", kind: "question" },
+      { session_id: 1, target_type: "company", target_id: 7, title: "t1", body: "b1", kind: "observation", created_at: "2026-08-01T00:00:00.000Z", updated_at: "2026-08-02T00:00:00.000Z" },
+      { session_id: 1, target_type: "role", target_id: 2, title: null, body: "b2", kind: "decision", created_at: "2026-08-03T00:00:00.000Z", updated_at: "2026-08-04T00:00:00.000Z" },
+      { session_id: null, target_type: null, target_id: null, title: "t3", body: "b3", kind: "summary", created_at: "2026-08-05T00:00:00.000Z", updated_at: "2026-08-06T00:00:00.000Z" },
+      { session_id: 1, target_type: "preference_candidate", target_id: 4, title: "t4", body: "b4", kind: "question", created_at: "2026-08-07T00:00:00.000Z", updated_at: "2026-08-08T00:00:00.000Z" },
     ];
     const insertNote = db.prepare(
-      `insert into notes (session_id, target_type, target_id, title, body, kind)
-       values (@session_id, @target_type, @target_id, @title, @body, @kind)`,
+      `insert into notes (session_id, target_type, target_id, title, body, kind, created_at, updated_at)
+       values (@session_id, @target_type, @target_id, @title, @body, @kind, @created_at, @updated_at)`,
     );
     for (const row of noteRows) insertNote.run(row);
 
     const evidenceRows = [
-      { target_type: "company", target_id: 7, url: "https://a.example", title: "e1", snippet: "s1", source_type: "company_site", confidence: 0.9, checked_at: "2026-09-01" },
-      { target_type: "role", target_id: 2, url: "https://b.example", title: null, snippet: "s2", source_type: "job_post", confidence: null, checked_at: "2026-09-01" },
+      { target_type: "company", target_id: 7, url: "https://a.example", title: "e1", snippet: "s1", source_type: "company_site", confidence: 0.9, checked_at: "2026-09-01", created_at: "2026-08-10T00:00:00.000Z" },
+      { target_type: "role", target_id: 2, url: "https://b.example", title: null, snippet: "s2", source_type: "job_post", confidence: null, checked_at: "2026-09-01", created_at: "2026-08-11T00:00:00.000Z" },
     ];
     const insertEvidence = db.prepare(
-      `insert into evidence (target_type, target_id, url, title, snippet, source_type, confidence, checked_at)
-       values (@target_type, @target_id, @url, @title, @snippet, @source_type, @confidence, @checked_at)`,
+      `insert into evidence (target_type, target_id, url, title, snippet, source_type, confidence, checked_at, created_at)
+       values (@target_type, @target_id, @url, @title, @snippet, @source_type, @confidence, @checked_at, @created_at)`,
     );
     for (const row of evidenceRows) insertEvidence.run(row);
 
