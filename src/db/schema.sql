@@ -97,7 +97,7 @@ create table roles (
 create table notes (
   id integer primary key autoincrement,
   session_id integer references sessions(id) on delete set null,
-  target_type text check (target_type is null or target_type in ('profile', 'session', 'company', 'role', 'preference', 'preference_candidate')),
+  target_type text check (target_type is null or target_type in ('profile', 'session', 'company', 'role', 'community', 'preference', 'preference_candidate')),
   target_id integer,
   title text,
   body text not null,
@@ -108,7 +108,7 @@ create table notes (
 
 create table evidence (
   id integer primary key autoincrement,
-  target_type text not null check (target_type in ('profile', 'session', 'company', 'role', 'preference', 'preference_candidate')),
+  target_type text not null check (target_type in ('profile', 'session', 'company', 'role', 'community', 'preference', 'preference_candidate')),
   target_id integer not null,
   url text not null,
   title text,
@@ -117,6 +117,24 @@ create table evidence (
   confidence real check (confidence is null or (confidence >= 0 and confidence <= 1)),
   checked_at text not null,
   created_at text not null default (datetime('now'))
+);
+
+create table communities (
+  id integer primary key autoincrement,
+  name text not null,
+  url text,
+  ecosystem text,
+  summary text,
+  primary_label text,
+  status text not null check (status in ('researching', 'watching', 'contributing', 'rejected', 'archived')),
+  median_merge_days real check (median_merge_days is null or median_merge_days >= 0),
+  outsider_merge_ratio real check (outsider_merge_ratio is null or (outsider_merge_ratio >= 0 and outsider_merge_ratio <= 1)),
+  last_activity_at text,
+  fit_score real check (fit_score is null or (fit_score >= 0 and fit_score <= 1)),
+  fit_assessment text,
+  last_checked_at text,
+  created_at text not null default (datetime('now')),
+  updated_at text not null default (datetime('now'))
 );
 
 create table tags (
