@@ -1,6 +1,9 @@
 export const companyStatuses = ["researching", "shortlisted", "watching", "rejected", "archived"] as const;
 export type CompanyStatus = (typeof companyStatuses)[number];
 
+export const communityStatuses = ["researching", "watching", "contributing", "rejected", "archived"] as const;
+export type CommunityStatus = (typeof communityStatuses)[number];
+
 export const roleStatuses = ["researching", "interested", "applied", "rejected", "closed", "archived"] as const;
 export type RoleStatus = (typeof roleStatuses)[number];
 
@@ -37,7 +40,7 @@ export type SourceType = (typeof sourceTypes)[number];
 export const remotePolicies = ["remote", "hybrid", "onsite", "unknown"] as const;
 export type RemotePolicy = (typeof remotePolicies)[number];
 
-export const targetTypes = ["profile", "session", "company", "role", "preference", "preference_candidate"] as const;
+export const targetTypes = ["profile", "session", "company", "role", "community", "preference", "preference_candidate"] as const;
 export type TargetType = (typeof targetTypes)[number];
 
 export const preferenceSources = ["manual", "approved_candidate", "import"] as const;

@@ -1,6 +1,7 @@
 import type {
   CandidateStatus,
   ApplicationStage,
+  CommunityStatus,
   CompanyStatus,
   MemoryKind,
   NoteKind,
@@ -84,6 +85,24 @@ export type Company = {
   fitScore: NullableScore;
   fitAssessment: string | null;
   lastCheckedAt: Timestamp | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type Community = {
+  id: number;
+  name: string;
+  url: string | null;
+  ecosystem: string | null;
+  summary: string | null;
+  primaryLabel: string | null;
+  status: CommunityStatus;
+  medianMergeDays: number | null;
+  outsiderMergeRatio: number | null;
+  lastActivityAt: string | null;
+  fitScore: NullableScore;
+  fitAssessment: string | null;
+  lastCheckedAt: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

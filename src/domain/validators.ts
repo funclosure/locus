@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   applicationStages,
+  communityStatuses,
   companyStatuses,
   candidateStatuses,
   memoryKinds,
@@ -39,6 +40,22 @@ export const companyInputSchema = z.object({
   summary: nullableTrimmedString,
   primaryLabel: nullableTrimmedString,
   status: z.enum(companyStatuses).default("researching"),
+  fitScore: fitScoreSchema.default(null),
+  fitAssessment: nullableTrimmedString,
+});
+
+const nonNegativeNumber = z.coerce.number().min(0).nullable();
+
+export const communityInputSchema = z.object({
+  name: trimmedString.describe("Repository or organisation name (e.g. raycast/extensions)."),
+  url: nullableTrimmedString,
+  ecosystem: nullableTrimmedString.describe("Language or platform (e.g. Swift, TypeScript)."),
+  summary: nullableTrimmedString,
+  primaryLabel: nullableTrimmedString,
+  status: z.enum(communityStatuses).default("researching"),
+  medianMergeDays: nonNegativeNumber.default(null).describe("Median days from PR open to merge."),
+  outsiderMergeRatio: scoreSchema.default(null).describe("Share of recent merges authored by non-maintainers, 0.0 to 1.0."),
+  lastActivityAt: nullableTrimmedString.describe("Date of the repository's most recent push."),
   fitScore: fitScoreSchema.default(null),
   fitAssessment: nullableTrimmedString,
 });
@@ -105,6 +122,7 @@ export const preferenceCandidateInputSchema = z.object({
 
 export type SessionStartInput = z.infer<typeof sessionStartInputSchema>;
 export type CompanyInput = z.infer<typeof companyInputSchema>;
+export type CommunityInput = z.infer<typeof communityInputSchema>;
 export type RoleInput = z.infer<typeof roleInputSchema>;
 export type ApplicationInput = z.infer<typeof applicationInputSchema>;
 export type NoteInput = z.infer<typeof noteInputSchema>;
