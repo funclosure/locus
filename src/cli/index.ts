@@ -6,6 +6,7 @@ import { migrateDatabase } from "../db/migrate.js";
 import { seedDefaultProfile } from "../db/seed.js";
 import {
   applicationInputSchema,
+  communityInputSchema,
   companyInputSchema,
   evidenceInputSchema,
   noteInputSchema,
@@ -17,6 +18,7 @@ import { buildJsonExport } from "../export/json.js";
 import { buildMarkdownExport } from "../export/markdown.js";
 import { getApplication, listApplications, upsertApplication } from "../repositories/applicationRepository.js";
 import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
+import { addCommunity, getCommunity, listCommunities, updateCommunity } from "../repositories/communityRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
 import { recordExport } from "../repositories/exportRepository.js";
 import { addNote, listNotes } from "../repositories/noteRepository.js";
@@ -145,6 +147,105 @@ company
         printJson({ company: updated });
       } else {
         printText(`Updated company ${updated.id}: ${updated.name}`);
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+const community = program.command("community").description("Open-source community commands");
+
+const communityFields = (cmd: Command): Command =>
+  cmd
+    .option("--name <name>", "Repository or organisation name (e.g. raycast/extensions)")
+    .option("--url <url>", "Repository URL")
+    .option("--ecosystem <ecosystem>", "Language or platform (e.g. Swift, TypeScript)")
+    .option("--summary <summary>", "Short summary")
+    .option("--primary-label <primaryLabel>", "Primary fit label")
+    .option("--status <status>", "Community status")
+    .option("--median-merge-days <medianMergeDays>", "Median days from PR open to merge")
+    .option("--outsider-merge-ratio <outsiderMergeRatio>", "Share of recent merges from non-maintainers, 0.0 to 1.0")
+    .option("--last-activity-at <lastActivityAt>", "Date of the most recent push")
+    .option("--fit-score <fitScore>", "Fit score from 0.0 to 1.0")
+    .option("--fit-assessment <fitAssessment>", "Fit assessment")
+    .option("--stdin", "Read JSON object from stdin")
+    .option("--json", "Print machine-readable JSON");
+
+communityFields(community.command("add")).action((options: Record<string, unknown> & { json?: boolean }) => {
+  ensureDatabase();
+  const input = communityInputSchema.parse(jsonPayload(options));
+  const db = openDatabase(process.env.LOCUS_DB_PATH);
+  try {
+    const created = addCommunity(db, input);
+    if (options.json) {
+      printJson({ community: created });
+    } else {
+      printText(`Added community ${created.id}: ${created.name}`);
+    }
+  } finally {
+    db.close();
+  }
+});
+
+community
+  .command("list")
+  .option("--status <status>", "Filter by community status")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { status?: string; json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const communities = listCommunities(
+        db,
+        options.status ? { status: communityInputSchema.shape.status.parse(options.status) } : {},
+      );
+      if (options.json) {
+        printJson({ communities });
+      } else {
+        for (const item of communities) {
+          printText(`${item.id}: ${item.name} [${item.status}]`);
+        }
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+community
+  .command("show")
+  .requiredOption("--id <id>", "Community id")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { id: string; json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const found = getCommunity(db, Number(options.id));
+      if (!found) {
+        throw new Error(`Community ${options.id} not found.`);
+      }
+      if (options.json) {
+        printJson({ community: found });
+      } else {
+        printText(`${found.id}: ${found.name} [${found.status}]`);
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+communityFields(community.command("update"))
+  .requiredOption("--id <id>", "Community id")
+  .action((options: Record<string, unknown> & { id: string; json?: boolean }) => {
+    ensureDatabase();
+    const { id, ...rest } = options;
+    const input = communityInputSchema.partial().parse(jsonPayload(rest));
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const updated = updateCommunity(db, Number(id), input);
+      if (options.json) {
+        printJson({ community: updated });
+      } else {
+        printText(`Updated community ${updated.id}: ${updated.name}`);
       }
     } finally {
       db.close();
