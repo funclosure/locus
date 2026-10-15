@@ -47,6 +47,7 @@ Use profile requirements first:
 - Remote requirement is hard.
 - Strong positive signals: iOS, Apple-platform native, interaction design, AI-first products, writing/notes/knowledge tools, craft-driven teams.
 - Prefer concise assessments over long commentary.
+- **No match with a target caps the score at 0.3.** If neither the product nor the role matches any of the profile's `interest` preferences (what the user is actually pursuing), say so plainly in `fit_assessment` and score 0.3 or below, however good the culture or remote fit. A match through the role counts (an iOS role at a fintech matches "iOS and Apple platforms"). Don't stretch the nearest interest or blend two into a "hybrid" to make a fit. A confident fit story for work the user isn't looking for does more harm than a low score.
 
 Record fit in company/role fields when clear:
 

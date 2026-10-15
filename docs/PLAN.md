@@ -238,6 +238,19 @@ Pipeline tracking for a company or role the user is actively pursuing. Added aft
 - `updated_at`: update timestamp.
 - Unique on (`target_type`, `target_id`); one application row per target.
 
+#### `application_events`
+
+Append-only history for an application (migration `0005`). `upsertApplication` writes an event when the row is created, when its stage changes, or when `feedback` is given. Read with `locus application history`; `locus application calibrate` compares the scores with outcomes (advisory, never changes scores).
+
+- `id`: primary key.
+- `application_id`: owning application; cascades on delete.
+- `stage`: `application_stage` at the event.
+- `feedback`: nullable employer feedback, stored verbatim.
+- `fit_score`: the target's fit score when the event was written, so later rescoring does not rewrite what preceded an outcome.
+- `source`: `recorded`, or `backfill` for the one event seeded per pre-existing application by the migration.
+- `occurred_at`: when it really happened (defaults to the write time; can be backdated).
+- `created_at`: creation timestamp.
+
 #### `exports`
 
 Generated artifacts.
@@ -437,7 +450,7 @@ Goal: make Locus easier for agent surfaces to call directly.
 
 Deliverables:
 
-- MCP server or local HTTP API exposing the same operations as the CLI. — done: stdio MCP server in `src/mcp/` (`pnpm mcp`, bin `locus-mcp`), 28 tools mirroring the CLI.
+- MCP server or local HTTP API exposing the same operations as the CLI. — done: stdio MCP server in `src/mcp/` (`pnpm mcp`, bin `locus-mcp`), 30 tools mirroring the CLI.
 - Tool schemas for core operations. — done: input schemas reuse the domain validators.
 - Agent integration docs. — done: `docs/mcp.md`.
 - Compatibility notes for Codex and Claude. — done: registration snippets for Claude Code, Claude Desktop, and Codex in `docs/mcp.md`.

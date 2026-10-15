@@ -19,6 +19,9 @@ export const applicationStages = [
 ] as const;
 export type ApplicationStage = (typeof applicationStages)[number];
 
+export const applicationEventSources = ["recorded", "backfill"] as const;
+export type ApplicationEventSource = (typeof applicationEventSources)[number];
+
 export const sessionStatuses = ["active", "paused", "completed", "archived"] as const;
 export type SessionStatus = (typeof sessionStatuses)[number];
 

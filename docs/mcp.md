@@ -18,7 +18,7 @@ The server reads/writes the same SQLite database as the CLI and web UI. The data
 
 ## Tool surface
 
-Twenty-eight tools, mirroring the CLI one-to-one:
+Thirty tools, mirroring the CLI one-to-one:
 
 | Group | Tools |
 | --- | --- |
@@ -30,10 +30,10 @@ Twenty-eight tools, mirroring the CLI one-to-one:
 | notes | `note_add`, `note_list` |
 | evidence | `evidence_add`, `evidence_list` |
 | preferences | `preference_propose`, `preference_list`, `preference_approve`, `preference_reject` |
-| applications | `application_set`, `application_list`, `application_show` |
+| applications | `application_set`, `application_list`, `application_show`, `application_history`, `application_calibrate` |
 | exports | `export_json`, `export_markdown`, `snapshot` |
 
-Writes return the created or updated record as JSON; reads return the matching list or record. `export_markdown` returns Markdown text; `export_json` and `snapshot` return the full dataset as JSON.
+Writes return the created or updated record as JSON; reads return the matching list or record. `export_markdown` returns Markdown text; `export_json` and `snapshot` return the full dataset as JSON. `application_calibrate` is advisory: it reports whether fit scores predict outcomes and never changes data.
 
 ## Registering with an agent
 

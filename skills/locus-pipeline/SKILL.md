@@ -12,6 +12,7 @@ Manage how each target moves through the application pipeline. One application r
 ```bash
 pnpm locus application list --json
 pnpm locus application show --target company:1 --json
+pnpm locus application history --target company:1 --json
 ```
 
 ## Stages
@@ -42,7 +43,21 @@ pnpm locus application set \
   --json
 ```
 
-Only `--target` and `--stage` are required; other fields are optional and preserved on upsert. (With the MCP server registered, `application_set` takes the same fields.)
+Only `--target` and `--stage` are required. Upsert replaces the whole row, so a field you leave out is cleared: run `show` first and pass the current `next_action`, dates and notes you want to keep. (With the MCP server registered, `application_set` takes the same fields.)
+
+## Record Outcomes
+
+Each stage change is appended to the target's history automatically, with a snapshot of its current `fit_score`. That history is what `locus application calibrate` reads, so keep it accurate:
+
+- When something happens on a past day, pass `--occurred-at 2026-09-20` so the history has the real date.
+- When the employer gives a reason (a rejection note, interview feedback), pass it with `--feedback`, **word for word**. Don't paraphrase, summarize or infer a reason they didn't state. Feedback can be recorded without a stage change.
+- Silence is not a rejection. Leave a ghosted application at its stage with a dated next action. Set `rejected` only after an explicit no, or once the user decides to call it.
+
+```bash
+pnpm locus application set --target role:3 --stage rejected \
+  --feedback "We went with a candidate with more SwiftUI depth." \
+  --occurred-at 2026-09-20 --notes "Rejected after final round." --json
+```
 
 ## Keep It Honest
 

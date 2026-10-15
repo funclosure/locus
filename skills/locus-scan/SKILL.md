@@ -165,6 +165,7 @@ strong company can carry a role that inverts the profile.
 Anchor to the profile's own weights so rounds stay comparable:
 
 - Failed hard requirement (weight 1.0) caps the score at **0.3**.
+- No match with any `interest` preference (through the product or the role) also caps at **0.3**. Say "no target match" in the assessment rather than borrowing the nearest interest or calling it a hybrid.
 - Confirmed negative signal at weight >= 0.9 caps at **0.45**.
 - Unverified negatives reduce but do not cap. State the uncertainty.
 - Positives accumulate only when no cap applies.

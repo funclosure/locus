@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import { listApplications } from "../repositories/applicationRepository.js";
+import { listApplicationEvents, listApplications } from "../repositories/applicationRepository.js";
 import { listCommunities } from "../repositories/communityRepository.js";
 import { listCompanies } from "../repositories/companyRepository.js";
 import { listEvidence } from "../repositories/evidenceRepository.js";
@@ -30,6 +30,7 @@ export function buildJsonExport(db: Database.Database): Record<string, unknown> 
     communities: listCommunities(db),
     roles: listRoles(db),
     applications: listApplications(db),
+    applicationEvents: listApplicationEvents(db),
     notes: listNotes(db),
     evidence: listEvidence(db),
     preferenceCandidates: listPreferenceCandidates(db),

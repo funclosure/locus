@@ -171,7 +171,7 @@ export async function runChat(message: string, companyId: number | null, dbPath?
       ),
       tool(
         "set_application",
-        "Set application pipeline progress for a company or role (stage, next action, dates, notes). Use when the user reports outreach or status changes.",
+        "Set application pipeline progress for a company or role (stage, next action, dates, notes). Use when the user reports outreach or status changes; pass any employer feedback verbatim as `feedback`.",
         {
           ...target,
           stage: z.enum(["researching", "warm_intro", "reached_out", "applied", "interviewing", "offer", "rejected", "paused"]),
@@ -179,6 +179,8 @@ export async function runChat(message: string, companyId: number | null, dbPath?
           nextActionAt: z.string().optional().describe("ISO date, e.g. 2026-07-08"),
           lastContactedAt: z.string().optional(),
           notes: z.string().optional(),
+          feedback: z.string().optional().describe("The employer's feedback, verbatim — never paraphrased"),
+          occurredAt: z.string().optional().describe("When it really happened, ISO date; defaults to now"),
         },
         async (args) =>
           withDb((db) => {

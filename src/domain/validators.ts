@@ -82,6 +82,9 @@ export const applicationInputSchema = z.object({
   nextActionAt: nullableTrimmedString,
   lastContactedAt: nullableTrimmedString,
   notes: nullableTrimmedString,
+  // Event fields: written to application history, not to the application row.
+  feedback: nullableTrimmedString,
+  occurredAt: nullableTrimmedString,
 });
 
 export const noteInputSchema = z.object({

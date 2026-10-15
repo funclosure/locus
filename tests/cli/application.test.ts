@@ -58,4 +58,34 @@ describe("application CLI", () => {
     expect(shown.application.targetId).toBe(1);
     expect(shown.application.notes).toBe("Warm intro via ex-colleague");
   });
+
+  it("records feedback in history and reports calibration", () => {
+    tempDir = mkdtempSync(join(tmpdir(), "locus-application-history-cli-"));
+    const dbPath = join(tempDir, "test.sqlite");
+    runCli(["company", "add", "--name", "Linear", "--fit-score", "0.8", "--json"], dbPath);
+    runCli(["application", "set", "--target", "company:1", "--stage", "applied", "--occurred-at", "2026-09-01", "--json"], dbPath);
+    runCli(
+      [
+        "application", "set", "--target", "company:1", "--stage", "rejected",
+        "--feedback", "Looking for more backend depth.", "--occurred-at", "2026-09-20", "--json",
+      ],
+      dbPath,
+    );
+
+    const history = JSON.parse(runCli(["application", "history", "--target", "company:1", "--json"], dbPath));
+    const calibration = JSON.parse(runCli(["application", "calibrate", "--json"], dbPath)).calibration;
+    const text = runCli(["application", "calibrate"], dbPath);
+
+    expect(history.events.map((event: { stage: string; occurredAt: string }) => [event.stage, event.occurredAt])).toEqual([
+      ["applied", "2026-09-01"],
+      ["rejected", "2026-09-20"],
+    ]);
+    expect(history.events[1].feedback).toBe("Looking for more backend depth.");
+    expect(calibration.verdict).toBe("insufficient");
+    expect(calibration.resolved).toHaveLength(1);
+    expect(calibration.feedback[0].name).toBe("Linear");
+    expect(text).toContain("(n too small)");
+    expect(text).toContain('"Looking for more backend depth."');
+  });
 });
+
