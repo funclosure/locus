@@ -69,7 +69,7 @@ A **`/`-activated chat bar** turns plain feedback into edits — *"mark Linear s
 ### MCP server
 
 ```bash
-pnpm mcp                # stdio MCP server exposing all CLI operations as 28 tools
+pnpm mcp                # stdio MCP server exposing all CLI operations as 30 tools
 ```
 
 Register it with Claude Code / Desktop / Codex — see [`docs/mcp.md`](docs/mcp.md).

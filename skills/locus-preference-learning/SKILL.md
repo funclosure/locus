@@ -22,6 +22,7 @@ Good candidates:
 - hard constraints: "remote required"
 - negative signals: "avoid vague recruiter-style roles"
 - tradeoff patterns: "small craft teams over generic scale"
+- outcome patterns: the same employer feedback recorded for two or more targets (see `pnpm locus application calibrate --json` → `feedback`). Quote the feedback in the description and name the targets. It may be a gap to close or a direction to drop; propose it, don't decide it
 
 Weak candidates:
 
