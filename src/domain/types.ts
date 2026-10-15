@@ -1,5 +1,6 @@
 import type {
   CandidateStatus,
+  ApplicationEventSource,
   ApplicationStage,
   CommunityStatus,
   CompanyStatus,
@@ -136,6 +137,17 @@ export type Application = {
   notes: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+};
+
+export type ApplicationEvent = {
+  id: number;
+  applicationId: number;
+  stage: ApplicationStage;
+  feedback: string | null;
+  fitScore: NullableScore;
+  source: ApplicationEventSource;
+  occurredAt: Timestamp;
+  createdAt: Timestamp;
 };
 
 export type Note = {

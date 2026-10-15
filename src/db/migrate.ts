@@ -22,6 +22,10 @@ const migrations = [
     version: "0004_communities",
     path: migrationPath("0004_communities.sql"),
   },
+  {
+    version: "0005_application_events",
+    path: migrationPath("0005_application_events.sql"),
+  },
 ];
 
 function migrationPath(filename: string): string {

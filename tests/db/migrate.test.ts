@@ -118,4 +118,41 @@ describe("migrateDatabase", () => {
 
     db.close();
   });
+
+  it("backfills one application event per existing application in 0005", () => {
+    tempDir = mkdtempSync(join(tmpdir(), "locus-migrate-events-"));
+    const dbPath = join(tempDir, "test.sqlite");
+    const migrationsDir = join(process.cwd(), "src", "db", "migrations");
+
+    const db = new Database(dbPath);
+    db.exec("pragma foreign_keys = on");
+    for (const file of ["0001_initial.sql", "0002_applications.sql", "0003_company_maker.sql", "0004_communities.sql"]) {
+      db.exec(readFileSync(join(migrationsDir, file), "utf8"));
+    }
+
+    db.prepare("insert into companies (name, status, fit_score) values ('Mem', 'shortlisted', 0.8)").run();
+    db.prepare("insert into roles (company_id, title, remote_policy, status, fit_score) values (1, 'iOS Engineer', 'remote', 'applied', 0.6)").run();
+    db.prepare(
+      "insert into applications (target_type, target_id, stage, updated_at) values ('company', 1, 'warm_intro', '2026-09-01T00:00:00.000Z')",
+    ).run();
+    db.prepare(
+      "insert into applications (target_type, target_id, stage, updated_at) values ('role', 1, 'interviewing', '2026-09-02T00:00:00.000Z')",
+    ).run();
+
+    db.exec(readFileSync(join(migrationsDir, "0005_application_events.sql"), "utf8"));
+
+    expect(db.prepare("select application_id, stage, feedback, fit_score, source, occurred_at from application_events order by id").all()).toEqual([
+      { application_id: 1, stage: "warm_intro", feedback: null, fit_score: 0.8, source: "backfill", occurred_at: "2026-09-01T00:00:00.000Z" },
+      { application_id: 2, stage: "interviewing", feedback: null, fit_score: 0.6, source: "backfill", occurred_at: "2026-09-02T00:00:00.000Z" },
+    ]);
+    expect(() =>
+      db.prepare("insert into application_events (application_id, stage, source, occurred_at) values (1, 'bogus', 'recorded', 'x')").run(),
+    ).toThrow();
+
+    // Deleting an application removes its history.
+    db.prepare("delete from applications where id = 1").run();
+    expect(db.prepare("select count(*) as n from application_events").get()).toEqual({ n: 1 });
+
+    db.close();
+  });
 });

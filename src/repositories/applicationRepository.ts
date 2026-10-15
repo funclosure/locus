@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import type { Application } from "../domain/types.js";
+import type { Application, ApplicationEvent } from "../domain/types.js";
 import type { ApplicationInput } from "../domain/validators.js";
 
 type ApplicationRow = {
@@ -15,7 +15,41 @@ type ApplicationRow = {
   updated_at: string;
 };
 
+type ApplicationEventRow = {
+  id: number;
+  application_id: number;
+  stage: ApplicationEvent["stage"];
+  feedback: string | null;
+  fit_score: number | null;
+  source: ApplicationEvent["source"];
+  occurred_at: string;
+  created_at: string;
+};
+
+// Upserts the application row and, when the stage changes or feedback is given,
+// appends an event to its history with a snapshot of the target's current fit score.
 export function upsertApplication(db: Database.Database, input: ApplicationInput): Application {
+  return db.transaction(() => {
+    const previous = getApplication(db, input.targetType, input.targetId);
+    const application = writeApplication(db, input);
+    const feedback = input.feedback ?? null;
+    if (!previous || previous.stage !== application.stage || feedback) {
+      db.prepare(
+        `insert into application_events (application_id, stage, feedback, fit_score, source, occurred_at)
+         values (?, ?, ?, ?, 'recorded', ?)`,
+      ).run(
+        application.id,
+        application.stage,
+        feedback,
+        currentFitScore(db, input.targetType, input.targetId),
+        input.occurredAt ?? application.updatedAt,
+      );
+    }
+    return application;
+  })();
+}
+
+function writeApplication(db: Database.Database, input: ApplicationInput): Application {
   const now = new Date().toISOString();
   db.prepare(
     `insert into applications
@@ -63,6 +97,21 @@ export function listApplications(db: Database.Database): Application[] {
   return rows.map(mapApplication);
 }
 
+export function listApplicationEvents(db: Database.Database, applicationId?: number): ApplicationEvent[] {
+  const rows = (
+    applicationId === undefined
+      ? db.prepare("select * from application_events order by application_id, occurred_at, id").all()
+      : db.prepare("select * from application_events where application_id = ? order by occurred_at, id").all(applicationId)
+  ) as ApplicationEventRow[];
+  return rows.map(mapApplicationEvent);
+}
+
+function currentFitScore(db: Database.Database, targetType: Application["targetType"], targetId: number): number | null {
+  const table = targetType === "company" ? "companies" : "roles";
+  const row = db.prepare(`select fit_score from ${table} where id = ?`).get(targetId) as { fit_score: number | null } | undefined;
+  return row?.fit_score ?? null;
+}
+
 function mapApplication(row: ApplicationRow): Application {
   return {
     id: row.id,
@@ -75,5 +124,18 @@ function mapApplication(row: ApplicationRow): Application {
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+function mapApplicationEvent(row: ApplicationEventRow): ApplicationEvent {
+  return {
+    id: row.id,
+    applicationId: row.application_id,
+    stage: row.stage,
+    feedback: row.feedback,
+    fitScore: row.fit_score,
+    source: row.source,
+    occurredAt: row.occurred_at,
+    createdAt: row.created_at,
   };
 }
