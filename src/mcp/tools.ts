@@ -17,7 +17,13 @@ import {
 } from "../domain/validators.js";
 import { buildJsonExport } from "../export/json.js";
 import { buildMarkdownExport } from "../export/markdown.js";
-import { getApplication, listApplications, upsertApplication } from "../repositories/applicationRepository.js";
+import { buildCalibrationReport } from "../reports/calibration.js";
+import {
+  getApplication,
+  listApplicationEvents,
+  listApplications,
+  upsertApplication,
+} from "../repositories/applicationRepository.js";
 import { addCommunity, getCommunity, listCommunities, updateCommunity } from "../repositories/communityRepository.js";
 import { addCompany, getCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
@@ -184,6 +190,19 @@ export function registerLocusTools(server: McpServer, dbPath?: string): void {
     }
     return json({ application });
   });
+  server.registerTool("application_history", { description: "Show the stage and feedback history for a target.", inputSchema: { targetType: z.enum(["company", "role"]), targetId: idField } }, async (args) => {
+    const result = withDb((db) => {
+      const application = getApplication(db, args.targetType, args.targetId);
+      return application ? { application, events: listApplicationEvents(db, application.id) } : null;
+    });
+    if (!result) {
+      throw new Error(`No application progress for ${args.targetType}:${args.targetId}.`);
+    }
+    return json(result);
+  });
+  server.registerTool("application_calibrate", { description: "Advisory report: do fit scores predict real outcomes (interview/offer rates per score band, recorded feedback)? Never changes scores." }, async () =>
+    withDb((db) => json({ calibration: buildCalibrationReport(db) })),
+  );
 
   // ── exports ──────────────────────────────────────────────
   server.registerTool("export_json", { description: "Return the full Locus dataset as JSON." }, async () => withDb((db) => json(buildJsonExport(db))));

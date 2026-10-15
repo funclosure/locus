@@ -16,7 +16,13 @@ import {
 } from "../domain/validators.js";
 import { buildJsonExport } from "../export/json.js";
 import { buildMarkdownExport } from "../export/markdown.js";
-import { getApplication, listApplications, upsertApplication } from "../repositories/applicationRepository.js";
+import { buildCalibrationReport } from "../reports/calibration.js";
+import {
+  getApplication,
+  listApplicationEvents,
+  listApplications,
+  upsertApplication,
+} from "../repositories/applicationRepository.js";
 import { addCommunity, getCommunity, listCommunities, updateCommunity } from "../repositories/communityRepository.js";
 import { addCompany, listCompanies, updateCompany } from "../repositories/companyRepository.js";
 import { addEvidence, listEvidence } from "../repositories/evidenceRepository.js";
@@ -603,6 +609,8 @@ application
   .option("--next-action-at <nextActionAt>", "Next action timestamp")
   .option("--last-contacted-at <lastContactedAt>", "Last contacted timestamp")
   .option("--notes <notes>", "Freeform notes")
+  .option("--feedback <feedback>", "Verbatim feedback from the employer, recorded in history")
+  .option("--occurred-at <occurredAt>", "When the stage change or feedback really happened (defaults to now)")
   .option("--stdin", "Read JSON object from stdin")
   .option("--json", "Print machine-readable JSON")
   .action((options: Record<string, unknown> & { target?: string; json?: boolean }) => {
@@ -650,6 +658,59 @@ application
       }
       if (options.json) printJson({ application: found });
       else printText(`${found.targetType}:${found.targetId} [${found.stage}]`);
+    } finally {
+      db.close();
+    }
+  });
+
+application
+  .command("history")
+  .description("Show the stage and feedback history for a target")
+  .requiredOption("--target <target>", "Target ref like company:1 or role:2")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { target: string; json?: boolean }) => {
+    ensureDatabase();
+    const ref = parseTargetRef(options.target);
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const found = getApplication(db, ref.targetType as "company" | "role", ref.targetId);
+      if (!found) {
+        throw new Error(`No application progress for ${options.target}.`);
+      }
+      const events = listApplicationEvents(db, found.id);
+      if (options.json) printJson({ application: found, events });
+      else
+        events.forEach((event) =>
+          printText(`${event.occurredAt} [${event.stage}]${event.feedback ? ` "${event.feedback}"` : ""}${event.source === "backfill" ? " (backfill)" : ""}`),
+        );
+    } finally {
+      db.close();
+    }
+  });
+
+application
+  .command("calibrate")
+  .description("Advisory: do fit scores predict real outcomes? Never changes scores")
+  .option("--json", "Print machine-readable JSON")
+  .action((options: { json?: boolean }) => {
+    ensureDatabase();
+    const db = openDatabase(process.env.LOCUS_DB_PATH);
+    try {
+      const report = buildCalibrationReport(db);
+      if (options.json) {
+        printJson({ calibration: report });
+        return;
+      }
+      printText(report.sentence);
+      report.bands.forEach((band) =>
+        printText(
+          `${band.label.padEnd(4)} ${band.range.padEnd(9)} n=${band.n} interviews=${band.interviews} offers=${band.offers} ${
+            band.interviewRate === null ? "(n too small)" : `interview rate ${Math.round(band.interviewRate * 100)}%`
+          }`,
+        ),
+      );
+      printText(`In flight (excluded): ${report.inFlight}. Unscored: ${report.unscored}. Scored only at outcome: ${report.scoredAtOutcome}.`);
+      report.feedback.forEach((item) => printText(`${item.occurredAt} ${item.name} [${item.stage}]: "${item.feedback}"`));
     } finally {
       db.close();
     }

@@ -57,6 +57,8 @@ const EXPECTED_TOOLS = [
   "application_set",
   "application_list",
   "application_show",
+  "application_history",
+  "application_calibrate",
   "export_json",
   "export_markdown",
   "snapshot",
@@ -94,6 +96,23 @@ describe("Locus MCP server", () => {
     expect(set.application.stage).toBe("applied");
     const shown = payload(await client.callTool({ name: "application_show", arguments: { targetType: "company", targetId: 1 } }));
     expect(shown.application.stage).toBe("applied");
+  });
+
+  it("returns application history and a calibration report", async () => {
+    const client = await connect();
+    await client.callTool({ name: "company_add", arguments: { name: "Mem", fitScore: 0.7 } });
+    await client.callTool({ name: "application_set", arguments: { targetType: "company", targetId: 1, stage: "applied", occurredAt: "2026-09-01" } });
+    await client.callTool({
+      name: "application_set",
+      arguments: { targetType: "company", targetId: 1, stage: "interviewing", feedback: "Loved the prototype.", occurredAt: "2026-09-12" },
+    });
+    const history = payload(await client.callTool({ name: "application_history", arguments: { targetType: "company", targetId: 1 } }));
+    expect(history.events.map((event: { stage: string }) => event.stage)).toEqual(["applied", "interviewing"]);
+    expect(history.events[1]).toMatchObject({ feedback: "Loved the prototype.", occurredAt: "2026-09-12", fitScore: 0.7 });
+
+    const { calibration } = payload(await client.callTool({ name: "application_calibrate", arguments: {} }));
+    expect(calibration.resolved).toHaveLength(1);
+    expect(calibration.verdict).toBe("insufficient");
   });
 
   it("returns a markdown export as text", async () => {
